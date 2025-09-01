@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>괜찮아 — IT’S OKAY</title>
+  <meta name="description" content="QR로 접속하면 ‘괜찮아’와 발음, 영어 해석을 볼 수 있습니다.">
+  <meta name="theme-color" content="#111111">
+  <style>
+    :root{ --maxw: 1024px; }
+    *{ box-sizing: border-box }
+    html,body{ height:100%; margin:0 }
+    body{
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, "Noto Sans KR", Apple SD Gothic Neo, "Malgun Gothic", Arial, sans-serif;
+      color:#111; line-height:1.55;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(255,219,219,.7), transparent 60%),
+                  radial-gradient(1000px 700px at 80% 30%, rgba(204,232,255,.55), transparent 60%),
+                  radial-gradient(900px 900px at 50% 100%, rgba(215,255,224,.55), transparent 60%),
+                  #f8f8fb;
+    }
+    .wrap{ min-height:100%; display:flex; align-items:center; justify-content:center; padding:28px }
+    .card{
+      width:100%; max-width:var(--maxw);
+      backdrop-filter: blur(8px);
+      background: rgba(255,255,255,.75);
+      border-radius: 24px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.08);
+      padding: clamp(20px, 4vw, 40px);
+      position:relative; overflow:hidden;
+    }
+    .brand{
+      position:absolute; top:16px; left:18px;
+      display:flex; align-items:center; gap:10px;
+      padding:6px 8px; border-radius:12px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 6px 20px rgba(0,0,0,.06);
+    }
+    .brand img{ height:28px; width:auto; display:block }
+    .main{
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap: 12px; text-align:center; padding-top: 30px; padding-bottom: 10px;
+    }
+    .word{ font-size: clamp(48px, 10vw, 120px); font-weight: 800; letter-spacing: -0.02em; margin: 6px 0 4px; }
+    .roman{ font-size: clamp(16px, 3.2vw, 22px); color:#333; }
+    .roman .label{ opacity:.75; margin-right:8px; font-weight:600 }
+    .roman .value{ letter-spacing:.02em; font-weight:700 }
+    .translation{ font-size: clamp(18px, 3.6vw, 26px); margin-top: 2px; }
+    .translation .label{ opacity:.65; margin-right:8px }
+    .translation .value{ font-weight:800 }
+    .lang{ margin-top: 2px; font-size: 14px; color:#555; }
+    .lang .pill{ display:inline-block; padding:4px 10px; border-radius:999px; background:#111; color:#fff; font-weight:600; font-size:12px; margin-left:6px; }
+    .btns{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; justify-content:center }
+    .btn{
+      font-size:16px; padding:10px 14px; border-radius:12px; border:0; cursor:pointer;
+      background:#111; color:#fff;
+      box-shadow: 0 8px 24px rgba(0,0,0,.14);
+    }
+    .btn:active{ transform: translateY(1px) }
+    .hint{ color:#666; font-size: 12px; margin-top: 6px }
+    .glow{
+      position:absolute; width:340px; height:340px; border-radius:50%;
+      background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0));
+      left:-120px; bottom:-120px; filter: blur(2px);
+      animation: float 12s ease-in-out infinite alternate; pointer-events:none;
+    }
+    .glow.r{ left:auto; right:-120px; bottom:auto; top:-120px; transform: scale(1.1); animation-delay: -6s}
+    @keyframes float{ from{ transform: translateY(0)} to{ transform: translateY(16px)} }
+    @media (min-height:720px){ .wrap{ padding-top: 8vh; padding-bottom: 8vh; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card" role="main" aria-labelledby="head-word">
+      <div class="glow" aria-hidden="true"></div>
+      <div class="glow r" aria-hidden="true"></div>
+
+      <div class="brand">
+        <img src="./logo.png" alt="로고">
+      </div>
+
+      <div class="main">
+        <h1 id="head-word" class="word">괜찮아</h1>
+        <div class="roman">
+          <span class="label">한국어 발음:</span>
+          <span class="value" id="roman-value">gwen-cha-na</span>
+        </div>
+        <div class="translation">
+          <span class="label">영어 해석:</span>
+          <span class="value" id="eng-meaning">IT’S OKAY</span>
+        </div>
+        <div class="lang">언어 <span class="pill">영어</span></div>
+        <div class="btns">
+          <button class="btn" id="speak-ko" aria-label="발음 듣기 (한국어)">발음 듣기(한국어)</button>
+        </div>
+        <div class="hint">일부 기기에서는 버튼을 눌러야 소리가 재생됩니다. 음량을 확인하세요.</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    window.__ROMAN_PHONETIC = window.__ROMAN_PHONETIC || "gwen-cha-na";
+    document.getElementById('roman-value').textContent = window.__ROMAN_PHONETIC;
+
+    (function(){
+      const speak = (text, lang='ko-KR') => {
+        if (!('speechSynthesis' in window)) { alert('이 브라우저는 음성출력을 지원하지 않습니다.'); return; }
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang;
+        u.rate = 1.0;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      };
+      document.getElementById('speak-ko').addEventListener('click', () => speak('괜찮아', 'ko-KR'));
+    })();
+  </script>
+</body>
+</html>
