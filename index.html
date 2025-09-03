@@ -65,15 +65,16 @@
     .tools{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap }
     .toolbtn{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-size:13px; }
     .hidden{ display:none }
+    footer.legal{ margin-top: 8px; text-align:center; font-size: 11.5px; color:#999; line-height:1.45 }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="container">
       <header class="header" aria-label="Brand">
-        <img src="./logo.png?v=3"
-             srcset="./logo.png?v=3 1x, ./logo@2x.png?v=3 2x"
-             alt="Brand logo">
+        <img src="./logo.png?v=4"
+             srcset="./logo.png?v=4 1x, ./logo@2x.png?v=4 2x"
+             alt="Inspire wood logo">
       </header>
 
       <main class="card" role="main">
@@ -101,6 +102,12 @@
         </section>
         <p class="hint">On some devices you may need to tap to play. Please check your volume.</p>
 
+        <!-- Bilingual KOGL attribution footer -->
+        <footer class="legal">
+          <div>출처: <b>안동엄마까투리체</b> — 안동시, 공유마당(한국저작권위원회), 공공누리 제1유형(출처표시).</div>
+          <div>Font: <b>Andong Eomma Katuri</b> — Andong City, via Share‑Madang (KOGL Type 1: Attribution).</div>
+        </footer>
+
         <section id="fallback" class="fallback hidden" aria-live="polite">
           <h3>Speech output is not supported here.</h3>
           <ol>
@@ -121,6 +128,7 @@
   </div>
 
   <script>
+    // Config
     window.__ROMAN_PHONETIC = window.__ROMAN_PHONETIC || "gwen\u2011cha\u2011na";
     // window.__KO_MP3_URL = "./its-okay-ko.mp3"; // optional MP3 fallback
     document.getElementById('roman-value').textContent = window.__ROMAN_PHONETIC;
