@@ -26,16 +26,18 @@
         #f7f8fb;
     }
     .wrap{ min-height:100%; padding: clamp(16px, 4vw, 36px); display:flex; justify-content:center }
-    .container{ width:100%; max-width: var(--maxw); display:grid; gap: var(--gap-5) }
+    .container{ width:100%; max-width: var(--maxw); display:grid; gap: 16px } /* B: tighter gap */
+
+    /* B) Logo only — no chip/card around it */
     header.header{
-      display:flex; align-items:center; gap: var(--gap-3);
-      padding: var(--gap-3);
-      background: var(--brand-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      box-shadow: none;
       width: max-content;
     }
-    header.header img{ height: clamp(26px, 3.2vw, 44px); width:auto; display:block }
+    header.header img{ height: clamp(24px, 2.4vw, 40px); width:auto; display:block } /* B */
+
     main.card{
       background: var(--card-bg);
       border-radius: var(--radius);
