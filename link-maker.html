@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link Maker — Inspire-wood</title>
+<meta name="theme-color" content="#111111">
+<style>
+  :root{
+    --maxw: 960px; --radius: 16px;
+    --shadow: 0 12px 36px rgba(0,0,0,.08);
+    --muted:#666;
+  }
+  *{ box-sizing: border-box }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial, sans-serif;
+    background:
+      radial-gradient(1000px 700px at 20% 10%, rgba(255,219,219,.5), transparent 60%),
+      radial-gradient(800px 600px at 80% 20%, rgba(204,232,255,.45), transparent 60%),
+      radial-gradient(900px 800px at 50% 100%, rgba(215,255,224,.45), transparent 60%),
+      #f7f8fb;
+    color:#111; line-height:1.55;
+  }
+  .wrap{ padding: clamp(16px, 4vw, 40px); display:flex; justify-content:center }
+  .container{ width:100%; max-width: var(--maxw); display:grid; gap: 16px }
+  header{ display:flex; align-items:baseline; gap: 12px; }
+  h1{ margin:0; font-size: clamp(22px, 3.6vw, 32px) }
+  .sub{ color: var(--muted); font-size: 13px }
+  .grid{ display:grid; grid-template-columns: 1fr; gap:16px }
+  @media (min-width: 900px){ .grid{ grid-template-columns: 1.2fr 1fr; } }
+  .card{ background:#fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(16px, 2.8vw, 28px); }
+  label{ font-size: 14px; font-weight:600; display:block; margin-bottom: 6px }
+  input[type="text"], input[type="url"]{
+    width:100%; padding:12px 12px; border-radius: 12px; border:1px solid #ddd; font-size:16px;
+  }
+  .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+  .btn{ padding:10px 14px; border-radius: 12px; border:1px solid #ddd; background:#fff; cursor:pointer; font-size:14px }
+  .btn.primary{ background:#111; color:#fff; border-color:#111 }
+  .btn.ghost{ background:#f7f7f7 }
+  .small{ font-size:12px; color:#777 }
+  .out{ background:#fff; border-radius: 12px; border:1px dashed #ddd; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  .qr{ display:flex; flex-direction:column; align-items:center; gap:12px }
+  .qr img{ width: 240px; height: 240px; border-radius: 8px; background: #fff; }
+  .actions{ display:flex; flex-wrap:wrap; gap:10px }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="container">
+      <header>
+        <h1>Link&nbsp;Maker</h1>
+        <div class="sub">문장 넣으면 URL/QR 자동 생성</div>
+      </header>
+
+      <section class="grid">
+        <article class="card">
+          <div class="row">
+            <div>
+              <label for="base">Base URL</label>
+              <input type="url" id="base" value="https://inspire-wood.github.io/its-okay/">
+              <div class="small">보통 수정할 필요 없음</div>
+            </div>
+            <button class="btn" id="reset">기본값</button>
+          </div>
+
+          <div style="height:8px"></div>
+          <label for="ko">한국어</label>
+          <input type="text" id="ko" placeholder="예: 괜찮아 / 고마워 / 사랑해">
+
+          <div style="height:8px"></div>
+          <div class="row">
+            <div>
+              <label for="roman">한국어 발음 (영문)</label>
+              <input type="text" id="roman" placeholder="예: gwen‑cha‑na / go‑ma‑wo / sa‑rang‑hae">
+              <div class="small">하이픈은 줄바꿈 방지하이픈(‑) 권장. 아래 버튼으로 자동 변환 가능</div>
+            </div>
+            <button class="btn" id="nbhyphen">하이픈 교체(‑)</button>
+          </div>
+
+          <div style="height:8px"></div>
+          <div class="row">
+            <div>
+              <label for="en">영어 의미</label>
+              <input type="text" id="en" placeholder="예: IT’S OKAY / THANK YOU / LOVE YOU">
+            </div>
+            <button class="btn" id="toupper">영문 대문자</button>
+          </div>
+
+          <div style="height:16px"></div>
+          <div class="actions">
+            <button class="btn primary" id="build">URL 생성</button>
+            <button class="btn" id="copy">URL 복사</button>
+            <a class="btn" id="open" target="_blank" rel="noopener">새 창에서 열기</a>
+          </div>
+
+          <div style="height:10px"></div>
+          <div class="out" id="out">여기에 결과 URL이 표시됩니다</div>
+        </article>
+
+        <aside class="card qr">
+          <div style="font-weight:700">QR 코드</div>
+          <img id="qr" alt="QR preview">
+          <div class="actions">
+            <a class="btn" id="download" download="qr.png">QR 다운로드</a>
+            <button class="btn ghost" id="refresh">QR 새로고침</button>
+          </div>
+          <div class="small">QR은 quickchart.io 이미지를 사용합니다.</div>
+        </aside>
+      </section>
+    </div>
+  </div>
+
+<script>
+  const $ = (s)=>document.querySelector(s);
+  const nonbreak = '\u2011'; // NB hyphen
+  const baseEl = $('#base'), koEl=$('#ko'), romanEl=$('#roman'), enEl=$('#en');
+  const out=$('#out'), openA=$('#open'), dlA=$('#download'), qrImg=$('#qr');
+
+  function buildUrl(){
+    const base = baseEl.value.trim() || 'https://inspire-wood.github.io/its-okay/';
+    const ko = koEl.value.trim();
+    const roman = romanEl.value.trim();
+    const en = enEl.value.trim();
+    const params = new URLSearchParams();
+    if (ko) params.set('ko', ko);
+    if (roman) params.set('roman', roman);
+    if (en) params.set('en', en);
+    const url = base.replace(/\/+$/, '/') + (params.toString() ? ('?' + params.toString()) : '');
+    out.textContent = url;
+    openA.href = url;
+    const enc = encodeURIComponent(url);
+    const qrsrc = 'https://quickchart.io/qr?text='+enc+'&size=480&margin=2';
+    qrImg.src = qrsrc;
+    dlA.href = qrsrc;
+    // persist
+    localStorage.setItem('linkmaker', JSON.stringify({base, ko, roman, en}));
+    return url;
+  }
+
+  function nbHyphenize(){
+    romanEl.value = romanEl.value.replace(/-/g, nonbreak);
+    buildUrl();
+  }
+  function toUpper(){
+    enEl.value = enEl.value.toUpperCase();
+    buildUrl();
+  }
+  function resetBase(){
+    baseEl.value = 'https://inspire-wood.github.io/its-okay/';
+    buildUrl();
+  }
+
+  $('#build').addEventListener('click', buildUrl);
+  $('#copy').addEventListener('click', async ()=>{
+    const url = buildUrl();
+    try { await navigator.clipboard.writeText(url); alert('복사됨'); }
+    catch(e){ prompt('복사가 불가한 환경입니다. 수동 복사:', url); }
+  });
+  $('#open').addEventListener('click', buildUrl);
+  $('#download').addEventListener('click', buildUrl);
+  $('#refresh').addEventListener('click', buildUrl);
+  $('#nbhyphen').addEventListener('click', nbHyphenize);
+  $('#toupper').addEventListener('click', toUpper);
+  $('#reset').addEventListener('click', resetBase);
+
+  // load persisted
+  try {
+    const saved = JSON.parse(localStorage.getItem('linkmaker')||'{}');
+    if (saved.base) baseEl.value = saved.base;
+    if (saved.ko) koEl.value = saved.ko;
+    if (saved.roman) romanEl.value = saved.roman;
+    if (saved.en) enEl.value = saved.en;
+  } catch(e){}
+  buildUrl();
+</script>
+</body>
+</html>
