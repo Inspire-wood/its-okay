@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>괜찮아 — IT’S OKAY</title>
-  <meta name="description" content="See ‘괜찮아’, hear the Korean pronunciation, and view the English meaning.">
+  <meta name="description" content="See the Korean word, hear its pronunciation, and view the English meaning.">
   <meta name="theme-color" content="#111111">
   <style>
     :root{
@@ -26,17 +26,10 @@
         #f7f8fb;
     }
     .wrap{ min-height:100%; padding: clamp(16px, 4vw, 36px); display:flex; justify-content:center }
-    .container{ width:100%; max-width: var(--maxw); display:grid; gap: 12px } /* centered: tighter gap */
+    .container{ width:100%; max-width: var(--maxw); display:grid; gap: 12px }
 
-    /* Logo centered above main card */
-    header.header{
-      margin: 4px auto 0;   /* center */
-      padding: 0;
-      background: transparent;
-      border-radius: 0;
-      box-shadow: none;
-      width: max-content;
-    }
+    /* Centered logo */
+    header.header{ margin: 4px auto 0; padding:0; background:transparent; border-radius:0; box-shadow:none; width:max-content; }
     header.header img{ height: clamp(22px, 2.2vw, 36px); width:auto; display:block }
 
     main.card{
@@ -131,10 +124,25 @@
   </div>
 
   <script>
-    // Config
-    window.__ROMAN_PHONETIC = window.__ROMAN_PHONETIC || "gwen\u2011cha\u2011na";
-    // window.__KO_MP3_URL = "./its-okay-ko.mp3"; // optional MP3 fallback
-    document.getElementById('roman-value').textContent = window.__ROMAN_PHONETIC;
+    const PRESETS = {
+      "its-okay": { ko: "괜찮아", roman: "gwen\u2011cha\u2011na", en: "IT’S OKAY" },
+      "thanks":   { ko: "고마워", roman: "go\u2011ma\u2011wo", en: "THANK YOU" }
+    };
+
+    const params = new URLSearchParams(location.search);
+    const key = params.get('p') || 'its-okay';
+    const base = PRESETS[key] || PRESETS['its-okay'];
+    const ko    = params.get('ko')    || base.ko;
+    const roman = params.get('roman') || base.roman;
+    const en    = params.get('en')    || base.en;
+
+    document.getElementById('k-word').textContent = ko;
+    document.getElementById('roman-value').textContent = roman;
+    document.getElementById('eng-meaning').textContent = en;
+
+    document.title = ko + ' — ' + en;
+    const md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute('content', `See ‘${ko}’, hear the Korean pronunciation, and view the English meaning (${en}).`);
 
     const ua = navigator.userAgent || "";
     const isInApp = /(KAKAOTALK|KAKAOTALK_iOS|NAVER|DaumApps|FBAN|FBAV|Instagram|Line)/i.test(ua);
@@ -142,27 +150,22 @@
 
     function showFallback(){
       const fb = document.getElementById('fallback'); fb.classList.remove('hidden');
-      const copyBtn = document.getElementById('copy-link');
-      if (copyBtn) {
-        copyBtn.addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText(location.href); alert('Link copied. Paste it into Chrome or Safari.'); }
-          catch(e){ prompt('Copy failed. Manually copy the link below:', location.href); }
-        });
-      }
       const openNew = document.getElementById('open-new'); openNew.href = location.href;
-      if (window.__KO_MP3_URL){
-        const wrap = document.getElementById('audio-wrap'); wrap.classList.remove('hidden');
-        const audio = document.getElementById('ko-audio'); audio.src = window.__KO_MP3_URL;
-      }
+      const copyBtn = document.getElementById('copy-link');
+      if (copyBtn) { copyBtn.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(location.href); alert('Link copied.'); }
+        catch(e){ prompt('Copy failed. Manually copy the link below:', location.href); }
+      }); }
     }
 
     (function(){
       const play = (text, lang='ko-KR') => {
         if (!ttsSupported || isInApp) { showFallback(); return; }
-        const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 1.0;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang; u.rate = 1.0;
         window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
       };
-      document.getElementById('speak-ko').addEventListener('click', () => play('괜찮아', 'ko-KR'));
+      document.getElementById('speak-ko').addEventListener('click', () => play(ko, 'ko-KR'));
       document.getElementById('open-new').href = location.href;
       if (!ttsSupported || isInApp) showFallback();
     })();
