@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kim.M.J Healing Sign</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(135deg,#fefefe,#f1f1f4);background-size:cover;background-position:center;font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;color:#333}
+    .card{width:min(92vw,640px);padding:32px;border-radius:24px;background:rgba(255,255,255,.84);box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:center}
+    h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px)}
+    h2{margin:0 0 24px;font-weight:400;font-size:clamp(16px,2.4vw,20px);color:#5b5b5b}
+    .msg{font-weight:700;font-size:clamp(18px,2.6vw,22px);color:#2c3e50;margin-top:8px}
+    .meta{margin-top:14px;font-size:12px;color:#6b6b6b}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Welcome to Kim.M.J</h1>
+    <h2>당신의 오늘이 따뜻하길</h2>
+    <div id="msg" class="msg"></div>
+    <div id="meta" class="meta"></div>
+  </div>
+  <script>
+    const items = [
+      {text:'내 은혜가 네게 족하도다 (고후 12:9)',bg:'https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1920&q=80'},
+      {text:'작은 은혜가 큰 기쁨을 만듭니다.',bg:'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80'},
+      {text:'마음에 평안을 누리세요.',bg:'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80'},
+      {text:'괜찮아, 다 잘 될 거예요.',bg:'https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1920&q=80'},
+      {text:'오늘의 햇살처럼 마음도 밝아지길.',bg:'https://images.unsplash.com/photo-1499084732479-de2c02d45fc4?auto=format&fit=crop&w=1920&q=80'}
+    ];
+    function dailyIndex(l){ const n=new Date(); const y=n.getFullYear(), m=n.getMonth()+1, d=n.getDate(); return (y*10000+m*100+d)%l; }
+    const mode = 'daily';
+    const pick = items[ mode==='daily' ? dailyIndex(items.length) : Math.floor(Math.random()*items.length) ];
+    document.getElementById('msg').textContent = pick.text;
+    const img = new Image();
+    img.onload = ()=>{ document.body.style.backgroundImage = `url(${pick.bg})`; };
+    img.src = pick.bg;
+    const ymd = (new Date()).toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'});
+    document.getElementById('meta').textContent = `${ymd} · Kim.M.J · mode: ${mode}`;
+  </script>
+</body>
+</html>
