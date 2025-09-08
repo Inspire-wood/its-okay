@@ -1,76 +1,94 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Personalized Healing Landing</title>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>힐링메세지 | K‑Healing Message</title>
+  <meta name="description" content="모든 날을 위한 작은 위로. 이름을 담아 전하세요. mode=daily 지원.">
+  <meta property="og:title" content="힐링메세지"/>
+  <meta property="og:description" content="To.Name + 하루 한 번 힐링 메시지. TTS/복사 기능."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:locale" content="ko_KR"/>
   <style>
-    :root{ --overlay-bg: rgba(255,255,255,.84); --text-dark:#2c3e50; }
-    *{box-sizing:border-box}
-    body{ margin:0; padding:0; font-family: system-ui, -apple-system, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; background-size:cover; background-position:center; background-repeat:no-repeat; transition: background-image 800ms ease-in-out; color:#3c2f2f; text-align:center; background-image: linear-gradient(135deg,#fefefe,#f1f1f4); }
-    .overlay{ width:min(92vw, 640px); background:var(--overlay-bg); border-radius:24px; padding:40px 28px; box-shadow:0 10px 30px rgba(0,0,0,.18); backdrop-filter: blur(4px); }
-    h1{font-size: clamp(28px, 4vw, 42px); margin:0 0 8px; letter-spacing: .2px}
-    h2{font-weight:400; font-size: clamp(16px, 2.4vw, 20px); margin:0 0 28px; color:#5b5b5b}
-    .message{font-size: clamp(18px, 2.6vw, 22px); font-weight:700; color:var(--text-dark)}
-    .meta{margin-top:18px; font-size:13px; color:#6b6b6b}
+    :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif}
+    .wrap{max-width:880px;margin:40px auto;padding:24px}
+    .card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:28px}
+    h1{font-size:clamp(26px,4vw,36px);margin:.2em 0 .4em}
+    .to{font-weight:700;margin-top:6px}
+    .msg{font-weight:900;font-size:clamp(36px,7vw,60px);letter-spacing:-.02em;margin:.4em 0 .2em}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+    button:hover{border-color:#cbd5e1}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:.5rem 0}
+    input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;min-width:220px}
+    .small{font-size:12px;color:#6b7280}
+    .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
   </style>
 </head>
 <body>
-  <div class="overlay">
-    <h1 id="title">Welcome</h1>
-    <h2 id="subtitle">당신의 오늘이 따뜻하길</h2>
-    <div class="message" id="message">…</div>
-    <div class="meta" id="meta"></div>
+  <div class="wrap">
+    <div class="card">
+      <h1>힐링메세지 <span class="small">K‑Healing Message</span></h1>
+      <div class="row">
+        <div><label for="name">이름 / To:</label><br/><input id="name" placeholder="Grace"/></div>
+        <div><label for="msg">메시지 (수동 입력시 우선)</label><br/><input id="msg" placeholder=""/></div>
+      </div>
+      <div class="to" id="toOut">To. Grace</div>
+      <div class="msg" id="msgOut">It’s okay.</div>
+      <div class="btns">
+        <button id="speakKo">한글 발음</button>
+        <button id="speakEn">영문 발음</button>
+        <button id="copy">링크 복사</button>
+        <button id="saveURL">URL 반영</button>
+      </div>
+      <p class="small">`mode=daily`이면 날짜 기반으로 고정된 “오늘의 문장”이 선택됩니다.</p>
+    </div>
+    <p class="footer">© Inspire Wood — K‑Mood Hangeul Sign</p>
   </div>
   <script>
-    const params = new URLSearchParams(location.search);
-    const nameParam = params.get('name');
-    const modeParam = params.get('mode') || 'daily';
-    const DATA = {"defaultName":"Grace","greetings":{"title":"Welcome to {name}","subtitle":"{name}, 오늘이 따뜻하길"},"items":[{"text":"{name} A","bg":"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80"},{"text":"{name} B","bg":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80"}]};
-    DATA.items = [{"text":"{name} A","bg":"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1920&q=80"},{"text":"{name} B","bg":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1920&q=80"}];
-
-    const $ = (id) => document.getElementById(id);
-    function personalize(str, name){ return (str||'').replaceAll('{name}', name); }
-    function dailyIndex(len){
-      if(!len || len<=0) return 0;
-      const now = new Date();
-      const y = now.getFullYear();
-      const m = now.getMonth()+1;
-      const d = now.getDate();
-      const seed = (y*10000)+(m*100)+d; // 안전한 산술 결합
-      return seed % len;
-    }
-    function randIndex(len){ return Math.floor(Math.random()*Math.max(1,len)); }
-
-    function applyBackground(url){
-      if(!url) return; // gradient fallback stays
-      const img = new Image();
-      img.onload = function(){ document.body.style.backgroundImage = 'url(' + url + ')'; };
-      img.onerror = function(){ /* keep gradient */ };
-      img.src = url;
-    }
-
-    (function init(){
-      const name = (nameParam && nameParam.trim()) || DATA.defaultName || 'Grace';
-      document.title = personalize((DATA.greetings?.title || 'Welcome to {name}'), name);
-      $('title').textContent = personalize((DATA.greetings?.title || 'Welcome to {name}'), name);
-      $('subtitle').textContent = personalize((DATA.greetings?.subtitle || '{name}, 오늘이 따뜻하길'), name);
-
-      const items = (DATA.items && DATA.items.length) ? DATA.items : [];
-      let pick = null;
-      if(items.length){
-        pick = (modeParam==='daily') ? items[dailyIndex(items.length)] : items[randIndex(items.length)];
-        $('message').textContent = personalize((pick && pick.text) || '', name);
-        applyBackground(pick && pick.bg);
-      }else{
-        $('message').textContent = '메시지를 등록해주세요.';
+    const MESSAGES = [
+      {ko:'괜찮아', en:"It's okay"},
+      {ko:'고마워', en:'Thank you'},
+      {ko:'사랑해', en:'I love you'},
+      {ko:'오늘도 수고했어', en:'You did well today'},
+      {ko:'숨 한번 크게 쉬어요', en:'Take a deep breath'},
+      {ko:'너는 충분해', en:'You are enough'},
+      {ko:'기다릴게', en:'I will wait for you'},
+      {ko:'천천히 가도 돼', en:"It's okay to go slow"}
+    ];
+    function qs(k){ return new URL(location.href).searchParams.get(k) || ''; }
+    function dailyPick(){ const d=new Date(); const seed = d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate(); return MESSAGES[seed % MESSAGES.length]; }
+    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
+    const nameIn=document.getElementById('name'); const msgIn=document.getElementById('msg'); const toOut=document.getElementById('toOut'); const msgOut=document.getElementById('msgOut');
+    function render(){
+      const name = nameIn.value.trim() || 'Grace';
+      let msg = msgIn.value.trim();
+      const mode = (qs('mode')||'').toLowerCase();
+      if(!msg){
+        if(mode==='daily'){ const pick = dailyPick(); msg = pick.ko + ' / ' + pick.en; }
+        else { msg = qs('msg') || "It's okay"; }
       }
-
-      const today = new Date();
-      const ymd = today.toLocaleDateString('ko-KR', {year:'numeric', month:'long', day:'numeric'});
-      const used = (pick && pick.bg) ? pick.bg : 'gradient-fallback';
-      $('meta').textContent = ymd + ' · ' + (modeParam==='daily' ? '일일 고정' : '랜덤 표시') + ' · 배경: ' + used;
-    })();
+      toOut.textContent = 'To. ' + name;
+      msgOut.textContent = msg;
+    }
+    nameIn.value = qs('name') || 'Grace';
+    msgIn.value  = qs('msg')  || '';
+    render();
+    nameIn.addEventListener('input', render);
+    msgIn.addEventListener('input', render);
+    document.getElementById('speakKo').addEventListener('click', ()=>speak(msgOut.textContent,'ko-KR'));
+    document.getElementById('speakEn').addEventListener('click', ()=>speak(msgOut.textContent,'en-US'));
+    document.getElementById('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); }catch(e){ alert('Copy failed'); } });
+    document.getElementById('saveURL').addEventListener('click', ()=>{
+      const url = new URL(location.href);
+      url.searchParams.set('name', nameIn.value.trim()||'Grace');
+      const mode = (qs('mode')||'').toLowerCase();
+      if(mode==='daily' && !msgIn.value.trim()){ url.searchParams.set('mode','daily'); url.searchParams.delete('msg'); }
+      else { url.searchParams.set('msg', msgIn.value.trim()||msgOut.textContent.trim()); url.searchParams.delete('mode'); }
+      history.replaceState({},'',url.toString());
+      try{ navigator.clipboard.writeText(url.toString()); }catch(e){}
+    });
   </script>
 </body>
 </html>
