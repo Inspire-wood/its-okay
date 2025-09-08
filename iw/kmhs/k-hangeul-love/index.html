@@ -1,1 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>It’s Okay — K-Mood Hangeul Sign | K-Hangeul Love</title>
+<meta name="description" content="K-Hangeul Love: story page for ‘괜찮아’. TTS, romanization, recommended meanings, font switcher, and short-link builder for Inspire Wood QR.">
+<meta property="og:title" content="It’s Okay — K-Mood Hangeul Sign"/>
+<meta property="og:description" content="Hear the pronunciation, see romanization, and pick a meaning. Build a short link for your QR."/>
+<meta property="og:type" content="website"/><meta property="og:locale" content="ko_KR"/>
+<!-- Optional font CDNs (safe to remove if undesired) -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/suitcss-components-grid@4.0.1/index.css">
+<style>
+:root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280;--accent:#0ea5e9;--ff:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,'Noto Sans KR',Helvetica,Arial,sans-serif}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:var(--ff)}
+.wrap{max-width:900px;margin:40px auto;padding:24px}
+.card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:28px}
+h1{font-size:clamp(28px,4.2vw,40px);margin:.2em 0 .4em}
+.lead{color:var(--muted);font-size:clamp(14px,2.6vw,16px)}
+.han{font-weight:900;font-size:clamp(44px,8vw,72px);letter-spacing:-.02em;margin:.2em 0 .1em}
+.roman{font-size:clamp(16px,2.8vw,20px);color:#374151;margin:.3em 0}
+.hint{font-size:14px;color:#6b7280;margin-top:2px}
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+@media (min-width:860px){.grid{grid-template-columns:1.2fr .8fr}}
+.sec{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px}
+label{font-size:12px;color:#6b7280}
+select,input[type=text]{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;width:100%}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+button,.button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+button:hover,.button:hover{border-color:#cbd5e1}
+.small{font-size:12px;color:#6b7280}
+.footer{margin-top:20px;color:#6b7280;font-size:13px;text-align:center}
+.tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151}
+hr{border:none;border-top:1px dashed #e5e7eb;margin:14px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="tag">Inspire Wood · K-Mood Hangeul Sign</div>
+    <h1>It’s Okay</h1>
+    <div class="roman">K-Hangeul Love</div>
+    <div class="han" id="han">괜찮아</div>
+    <div class="roman" id="roman">gwaenchana</div>
+    <div class="hint" id="hint">친숙 표기: 괜차나</div>
+    <p class="lead">“괜찮아”는 위로와 용기를 건네는 따뜻한 한국어 표현입니다. 오늘 하루, 자신에게도 그렇게 말해 보세요.</p>
+    <div class="btns">
+      <button id="speakKo">발음(ko)</button>
+      <button id="speakEn">발음(en)</button>
+      <button id="copyLink">링크 복사</button>
+    </div>
+  </div>
 
+  <div class="grid" style="margin-top:18px">
+    <div class="sec">
+      <strong>의미(번역) 선택</strong>
+      <p class="small">추천 중에서 고르거나, 직접 입력하세요.</p>
+      <div>
+        <label><input type="radio" name="mean" value="It’s okay." checked> It’s okay.</label><br/>
+        <label><input type="radio" name="mean" value="You’re okay."> You’re okay.</label><br/>
+        <label><input type="radio" name="mean" value="You did well."> You did well.</label><br/>
+        <label><input type="radio" name="mean" value="You’re safe now."> You’re safe now.</label><br/>
+        <label><input type="radio" name="mean" value="Breathe, it’s okay."> Breathe, it’s okay.</label><br/>
+        <label><input type="radio" name="mean" value="__custom__"> 직접 입력</label>
+        <input id="meanCustom" type="text" placeholder="직접 입력…" style="margin-top:6px;display:none"/>
+      </div>
+      <hr/>
+      <div class="btns">
+        <button id="savePref">선택 저장</button>
+        <button id="clearPref">초기화</button>
+      </div>
+      <div class="small" id="saved"></div>
+    </div>
+
+    <div class="sec">
+      <strong>폰트 스위처 & 출처</strong>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <div style="flex:1 1 160px">
+          <label for="fontSel">폰트</label>
+          <select id="fontSel">
+            <option value="system">System Default</option>
+            <option value="'Pretendard', system-ui">Pretendard (CDN)</option>
+            <option value="'Noto Sans KR', system-ui">Noto Sans KR (GF)</option>
+          </select>
+        </div>
+        <div style="flex:2 1 220px">
+          <label for="credit">폰트 출처/라이선스 표기</label>
+          <input id="credit" type="text" placeholder="예) Pretendard by Kil Hyung-do · OFL"/>
+        </div>
+      </div>
+      <p class="small" id="creditOut" style="margin-top:8px;color:#374151"></p>
+    </div>
+  </div>
+
+  <div class="sec" style="margin-top:18px">
+    <strong>Short Link(슬러그) 만들기</strong>
+    <p class="small">기본 경로 + 슬러그를 합쳐 짧은 링크를 만듭니다. (예: <code>/iw/kmhs/k-hangeul-love/</code>)</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div style="flex:2 1 220px">
+        <label for="base">기본 경로(Base)</label>
+        <input id="base" type="text" placeholder="/iw/kmhs/k-hangeul-love/"/>
+      </div>
+      <div style="flex:1 1 160px">
+        <label for="slug">슬러그</label>
+        <input id="slug" type="text" value="io"/>
+      </div>
+    </div>
+    <div class="btns" style="margin-top:8px">
+      <button id="build">링크 생성 & 복사</button>
+    </div>
+    <div class="small" id="shortOut"></div>
+  </div>
+
+  <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
+</div>
+<script>
+function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
+document.getElementById('speakKo').addEventListener('click',()=>speak('괜찮아','ko-KR'));
+document.getElementById('speakEn').addEventListener('click',()=>speak('It’s okay','en-US'));
+document.getElementById('copyLink').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); speak('복사되었습니다','ko-KR'); }catch(e){ alert('Copy failed'); } });
+// Meaning radios
+const radios=[...document.querySelectorAll('input[name=mean]')]; const meanCustom=document.getElementById('meanCustom');
+function updateCustom(){ if(radios.find(r=>r.checked&&r.value==='__custom__')){ meanCustom.style.display='block'; } else { meanCustom.style.display='none'; } }
+radios.forEach(r=>r.addEventListener('change',updateCustom)); updateCustom();
+// Save/clear prefs
+document.getElementById('savePref').addEventListener('click',()=>{ const chosen = radios.find(r=>r.checked)?.value||''; const val = chosen==='__custom__' ? meanCustom.value : chosen; localStorage.setItem('kmhs_love_mean', val); document.getElementById('saved').textContent='저장됨: '+val; });
+document.getElementById('clearPref').addEventListener('click',()=>{ localStorage.removeItem('kmhs_love_mean'); document.getElementById('saved').textContent='초기화 완료'; });
+// Font switcher + credit
+const fontSel=document.getElementById('fontSel'); const creditIn=document.getElementById('credit'); const creditOut=document.getElementById('creditOut');
+function applyFont(){ const v=fontSel.value; document.documentElement.style.setProperty('--ff', v==='system'?'system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Noto Sans KR,Helvetica,Arial,sans-serif':v); localStorage.setItem('kmhs_font', v); }
+function applyCredit(){ creditOut.textContent = creditIn.value.trim(); localStorage.setItem('kmhs_credit', creditIn.value.trim()); }
+fontSel.addEventListener('change', applyFont); creditIn.addEventListener('input', applyCredit);
+// Init saved
+(function(){ const m=localStorage.getItem('kmhs_love_mean'); if(m){ const r=radios.find(x=>x.value===m); if(r){ r.checked=true; }else{ radios.find(x=>x.value==='__custom__').checked=true; meanCustom.style.display='block'; meanCustom.value=m; } document.getElementById('saved').textContent='저장됨: '+m; } const f=localStorage.getItem('kmhs_font'); if(f){ fontSel.value=f; applyFont(); } const c=localStorage.getItem('kmhs_credit'); if(c){ creditIn.value=c; creditOut.textContent=c; } })();
+// Short link builder
+document.getElementById('build').addEventListener('click', async ()=>{ const base=document.getElementById('base').value.trim()||'/iw/kmhs/k-hangeul-love/'; const slug=document.getElementById('slug').value.trim()||'io'; const link = base.replace(/\/+$/,'/') + encodeURIComponent(slug) + '/'; document.getElementById('shortOut').textContent=link; try{ await navigator.clipboard.writeText(link); speak('복사되었습니다','ko-KR'); }catch(e){} });
+</script>
+</body>
+</html>
