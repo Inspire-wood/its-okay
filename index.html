@@ -3,12 +3,17 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>한글사랑 | It’s Okay — K‑Mood Hangeul Sign</title>
-  <meta name="description" content="Inspire Wood · K‑Mood Hangeul Sign. ‘괜찮아’의 의미를 전하고 발음을 들어보세요.">
-  <meta property="og:title" content="한글사랑 | It’s Okay"/>
-  <meta property="og:description" content="‘괜찮아’ — 위로와 용기의 한국어 표현. 발음 듣기, 간단 공유 지원."/>
-  <meta property="og:type" content="website"/>
-  <meta property="og:locale" content="ko_KR"/>
+  <title>한글사랑 | It’s Okay — K-Mood Hangeul Sign</title>
+  <meta name="description" content="Inspire Wood · K-Mood Hangeul Sign. ‘괜찮아’의 의미를 전하고 발음을 들어보세요.">
+  <meta name="theme-color" content="#111111">
+  <link rel="icon" href="/its-okay/assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" href="/its-okay/assets/icons/apple-touch-icon-180.png" sizes="180x180">
+  <meta property="og:title" content="한글사랑 | It’s Okay — K-Mood Hangeul Sign">
+  <meta property="og:description" content="‘괜찮아’ — 위로와 용기의 표현. TTS와 공유를 지원합니다.">
+  <meta property="og:image" content="https://inspire-wood.github.io/its-okay/assets/og/k-hangeul-love_og.png">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif}
@@ -29,20 +34,20 @@
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="tag">Inspire Wood · K‑Mood Hangeul Sign</div>
-      <h1>한글사랑 <span class="small">K‑Hangeul Love</span></h1>
+      <div class="tag">Inspire Wood · K-Mood Hangeul Sign</div>
+      <h1>한글사랑 <span class="small">K-Hangeul Love</span></h1>
       <div class="han" id="han">괜찮아</div>
       <div class="roman" id="roman">gwaenchana <span class="small">(친숙: 괜차나)</span></div>
       <p class="lead">“괜찮아”는 위로와 용기를 건네는 따뜻한 한국어 표현입니다.</p>
       <div class="btns">
         <button id="speakKo">발음 듣기(ko)</button>
         <button id="copy">링크 복사</button>
-        <a href="./healing/index.html?name=Grace&mode=daily" style="text-decoration:none">
+        <a href="./healing/?name=Grace&mode=daily" style="text-decoration:none">
           <button>힐링메세지 보기</button>
         </a>
       </div>
     </div>
-    <p class="footer">© Inspire Wood — K‑Mood Hangeul Sign</p>
+    <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
   </div>
   <script>
     function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
