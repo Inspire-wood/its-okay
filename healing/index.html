@@ -1,57 +1,51 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>힐링메세지 | K-Healing Message</title>
-  <meta name="description" content="모든 날을 위한 작은 위로. 이름을 담아 전하세요. mode=daily 지원.">
-  <meta name="theme-color" content="#111111">
+  <title>Healing Message — K-Mood Hangeul Sign</title>
+  <meta name="description" content="Personalize a name and a healing note, or use daily mode. Link Maker PRO v2.2 integrated.">
   <link rel="icon" href="/its-okay/assets/icons/favicon.ico">
   <link rel="apple-touch-icon" href="/its-okay/assets/icons/apple-touch-icon-180.png" sizes="180x180">
-  <meta property="og:title" content="힐링메세지 | K-Healing Message">
-  <meta property="og:description" content="To.Name + 하루 한 번 힐링 메시지. TTS/복사 지원.">
-  <meta property="og:image" content="https://inspire-wood.github.io/its-okay/assets/og/k-healing-message_og.png">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="ko_KR">
-  <meta name="twitter:card" content="summary_large_image">
   <style>
-    :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280}
+    :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280;--card:#fff}
     html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif}
-    .wrap{max-width:880px;margin:40px auto;padding:24px}
+    .wrap{max-width:900px;margin:40px auto;padding:24px}
     .card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:28px}
     h1{font-size:clamp(26px,4vw,36px);margin:.2em 0 .4em}
     .to{font-weight:700;margin-top:6px}
     .msg{font-weight:900;font-size:clamp(36px,7vw,60px);letter-spacing:-.02em;margin:.4em 0 .2em}
     .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
-    button:hover{border-color:#cbd5e1}
+    .button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;text-decoration:none;color:#111;display:inline-flex;align-items:center;justify-content:center}
+    .button:hover{border-color:#cbd5e1}
     .row{display:flex;gap:10px;flex-wrap:wrap;margin:.5rem 0}
     input{border:1px solid #e5e7eb;border-radius:12px;padding:10px 12px;min-width:220px}
-    .small{font-size:12px;color:#6b7280}
     .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
+    .small{font-size:12px;color:#6b7280}
   </style>
+  <link rel="stylesheet" href="/its-okay/tools/link-maker-pro-v2.2/linkmaker.css">
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>힐링메세지 <span class="small">K-Healing Message</span></h1>
+      <h1>Healing Message</h1>
       <div class="row">
-        <div><label for="name">이름 / To:</label><br/><input id="name" placeholder="Grace"/></div>
-        <div><label for="msg">메시지 (수동 입력시 우선)</label><br/><input id="msg" placeholder=""/></div>
+        <div><label for="name">To</label><br/><input id="name" placeholder="Grace"/></div>
+        <div><label for="msg">Message (optional)</label><br/><input id="msg" placeholder="It's okay."/></div>
       </div>
       <div class="to" id="toOut">To. Grace</div>
-      <div class="msg" id="msgOut">It’s okay.</div>
+      <div class="msg" id="msgOut">It's okay.</div>
       <div class="btns">
-        <button id="speakKo">한글 발음</button>
-        <button id="speakEn">영문 발음</button>
-        <button id="copy">링크 복사</button>
-        <button id="saveURL">URL 반영</button>
+        <button id="speakKo" class="button">Play TTS (KO)</button>
+        <button id="speakEn" class="button">Play TTS (EN)</button>
       </div>
-      <p class="small">`mode=daily`이면 날짜 기반으로 고정된 “오늘의 문장”이 선택됩니다.</p>
+      <p class="small">Add <code>?name=Grace&mode=daily</code> for daily message rotation. Or set <code>?msg=...</code>.</p>
     </div>
     <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
   </div>
   <script>
+    function qs(k){ return new URL(location.href).searchParams.get(k) || ''; }
+    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
     const MESSAGES = [
       {ko:'괜찮아', en:"It's okay"},
       {ko:'고마워', en:'Thank you'},
@@ -62,38 +56,24 @@
       {ko:'기다릴게', en:'I will wait for you'},
       {ko:'천천히 가도 돼', en:"It's okay to go slow"}
     ];
-    function qs(k){ return new URL(location.href).searchParams.get(k) || ''; }
     function dailyPick(){ const d=new Date(); const seed = d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate(); return MESSAGES[seed % MESSAGES.length]; }
-    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
-    const nameIn=document.getElementById('name'); const msgIn=document.getElementById('msg'); const toOut=document.getElementById('toOut'); const msgOut=document.getElementById('msgOut');
+    const nameIn=document.getElementById('name'), msgIn=document.getElementById('msg'), toOut=document.getElementById('toOut'), msgOut=document.getElementById('msgOut');
     function render(){
       const name = nameIn.value.trim() || 'Grace';
       let msg = msgIn.value.trim();
       const mode = (qs('mode')||'').toLowerCase();
       if(!msg){
         if(mode==='daily'){ const pick = dailyPick(); msg = pick.ko + ' / ' + pick.en; }
-        else { msg = qs('msg') || "It's okay"; }
+        else { msg = qs('msg') || "It's okay."; }
       }
-      toOut.textContent = 'To. ' + name;
-      msgOut.textContent = msg;
+      toOut.textContent = 'To. ' + name; msgOut.textContent = msg;
     }
-    nameIn.value = qs('name') || 'Grace';
-    msgIn.value  = qs('msg')  || '';
-    render();
-    nameIn.addEventListener('input', render);
-    msgIn.addEventListener('input', render);
+    nameIn.value = qs('name') || 'Grace'; msgIn.value  = qs('msg')  || ''; render();
+    nameIn.addEventListener('input', render); msgIn.addEventListener('input', render);
     document.getElementById('speakKo').addEventListener('click', ()=>speak(msgOut.textContent,'ko-KR'));
     document.getElementById('speakEn').addEventListener('click', ()=>speak(msgOut.textContent,'en-US'));
-    document.getElementById('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); }catch(e){ alert('Copy failed'); } });
-    document.getElementById('saveURL').addEventListener('click', ()=>{
-      const url = new URL(location.href);
-      url.searchParams.set('name', nameIn.value.trim()||'Grace');
-      const mode = (qs('mode')||'').toLowerCase();
-      if(mode==='daily' && !msgIn.value.trim()){ url.searchParams.set('mode','daily'); url.searchParams.delete('msg'); }
-      else { url.searchParams.set('msg', msgIn.value.trim()||msgOut.textContent.trim()); url.searchParams.delete('mode'); }
-      history.replaceState({},'',url.toString());
-      try{ navigator.clipboard.writeText(url.toString()); }catch(e){}
-    });
   </script>
+  <script src="/its-okay/tools/link-maker-pro-v2.2/linkmaker.js"></script>
+  <script> LinkMakerPro.init({ defaultSlug:'healing', isHealing:true }); </script>
 </body>
 </html>

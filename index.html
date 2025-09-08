@@ -3,27 +3,13 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>It’s Okay — K‑Mood Hangeul Sign</title>
-  <meta name="description" content="Inspire Wood · K‑Mood Hangeul Sign. Hear the Hangul pronunciation of ‘괜찮아’ and open the healing message page.">
-  <meta name="theme-color" content="#111111">
-  <!-- Icons (optional if already uploaded) -->
+  <title>It’s Okay — K-Mood Hangeul Sign</title>
+  <meta name="description" content="Hear the Hangul pronunciation of ‘괜찮아’ and open the healing page. Link Maker PRO v2.2 integrated.">
   <link rel="icon" href="/its-okay/assets/icons/favicon.ico">
   <link rel="apple-touch-icon" href="/its-okay/assets/icons/apple-touch-icon-180.png" sizes="180x180">
-  <!-- Open Graph -->
-  <meta property="og:title" content="It’s Okay — K‑Mood Hangeul Sign">
-  <meta property="og:description" content="Warm encouragement in Hangul. Play TTS and open the healing message page.">
-  <meta property="og:image" content="https://inspire-wood.github.io/its-okay/assets/og/k-hangeul-love_og.png">
-  <meta property="og:type" content="website">
-  <meta property="og:locale" content="ko_KR">
-  <meta name="twitter:card" content="summary_large_image">
   <style>
-    :root{
-      --bg:#faf7f4; --ink:#111; --muted:#6b7280; --card:#ffffff;
-      --accent:#0ea5e9; --brand:#111;
-      --ff: system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif;
-    }
-    html,body{margin:0;padding:0;height:100%;font-family:var(--ff);color:var(--ink)}
-    /* 1) 감성적인 배경 디자인 (레이어드 그라디언트 + 은은한 텍스처) */
+    :root{--bg:#faf7f4; --ink:#111; --muted:#6b7280; --card:#ffffff}
+    html,body{margin:0;padding:0;height:100%;font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif;color:var(--ink)}
     body{
       background:
         radial-gradient(1200px 600px at 10% 0%, #fffdfa 0%, rgba(255,253,250,0) 60%),
@@ -31,18 +17,12 @@
         linear-gradient(180deg, #faf7f4 0%, #f4efe9 100%);
       position:relative;
     }
-    body::after{
-      content:""; position:fixed; inset:0; pointer-events:none; opacity:.06;
+    body::after{content:""; position:fixed; inset:0; pointer-events:none; opacity:.06;
       background-image:
         repeating-linear-gradient(0deg, rgba(0,0,0,.9) 0 1px, transparent 1px 2px),
-        repeating-linear-gradient(90deg, rgba(0,0,0,.6) 0 1px, transparent 1px 2px);
-      mix-blend-mode:multiply;
-    }
+        repeating-linear-gradient(90deg, rgba(0,0,0,.6) 0 1px, transparent 1px 2px); mix-blend-mode:multiply;}
     .wrap{max-width:900px;margin:40px auto;padding:24px}
-    .card{
-      background:var(--card); border-radius:18px; box-shadow:0 6px 24px rgba(0,0,0,.08);
-      padding:28px; backdrop-filter:saturate(1.1) blur(0.5px);
-    }
+    .card{background:var(--card); border-radius:18px; box-shadow:0 6px 24px rgba(0,0,0,.08); padding:28px}
     .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151;background:#fff8}
     h1{font-size:clamp(30px,4.8vw,44px);margin:.2em 0 .2em}
     .han{font-weight:900;font-size:clamp(52px,9vw,84px);letter-spacing:-.02em;margin:.15em 0 .1em}
@@ -52,37 +32,31 @@
     .button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;text-decoration:none;color:#111;display:inline-flex;align-items:center;justify-content:center}
     .button:hover{border-color:#cbd5e1}
     .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
-    .small{font-size:12px;color:#6b7280}
     .credits{margin-top:12px; font-size:12px; color:#6b7280}
   </style>
+  <link rel="stylesheet" href="/its-okay/tools/link-maker-pro-v2.2/linkmaker.css">
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="tag">Inspire Wood · K‑Mood Hangeul Sign</div>
-      <!-- 2) '한글사랑' 삭제: 메인 타이틀은 영어만 -->
+      <div class="tag">Inspire Wood · K-Mood Hangeul Sign</div>
       <h1>It’s Okay</h1>
-
-      <div class="han" id="han">괜찮아</div>
-      <!-- 3) 영문표기: gwen‑cha‑na (하이픈 적용, NB hyphen U+2011) -->
-      <div class="roman" id="roman">gwen‑cha‑na</div>
-
+      <div class="han">괜찮아</div>
+      <div class="roman">gwen-cha-na</div>
       <p class="lead">A gentle Korean phrase that says, “It’s okay.” Give yourself a soft nod today.</p>
-
       <div class="btns">
-        <!-- 4) 버튼 한글 > 영문으로 / 5) 링크복사 삭제 -->
         <button id="speakKo" class="button">Play TTS (KO)</button>
         <a class="button" href="./healing/?name=Grace&mode=daily">Open Healing Message</a>
       </div>
-
-      <!-- 6) 글꼴 표기 -->
-      <div class="credits">Fonts: System UI / Pretendard (OFL) — add or replace as needed.</div>
+      <div class="credits">Fonts: System UI / Pretendard (OFL)</div>
     </div>
-    <p class="footer">© Inspire Wood — K‑Mood Hangeul Sign</p>
+    <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
   </div>
   <script>
     function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
     document.getElementById('speakKo').addEventListener('click',()=>speak('괜찮아','ko-KR'));
   </script>
+  <script src="/its-okay/tools/link-maker-pro-v2.2/linkmaker.js"></script>
+  <script> LinkMakerPro.init({ defaultSlug:'io', isHealing:false }); </script>
 </body>
 </html>
