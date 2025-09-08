@@ -7,88 +7,117 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
+  <!-- floating gradient blobs -->
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+  <div class="blob three"></div>
+
   <div class="wrap">
-    <div class="topbar">
-      <h1>Tools Dashboard</h1>
+    <div class="hero">
       <div>
-        <a class="btn" href="../">← Back to It’s Okay</a>
-        <button id="export" class="btn">Export JSON</button>
-        <label class="btn" style="cursor:pointer">Import JSON<input id="import" type="file" accept="application/json" style="display:none"></label>
-        <button id="reset" class="btn">Reset</button>
+        <div class="brand"><div class="badge">IW</div><span class="tag">Creator Tools</span></div>
+        <h1>감성 툴 대시보드</h1>
+        <div class="sub">따뜻한 링크와 메시지를 만드는 작은 도구집. 필요할 땐 가볍게 열고, 끝나면 살포시 닫아요. 🌿</div>
+      </div>
+      <div class="actions">
+        <a class="btn" href="../">← It’s Okay</a>
+        <button id="export" class="button">Export JSON</button>
+        <label class="button" style="cursor:pointer">Import JSON<input id="import" type="file" accept="application/json" style="display:none"></label>
+        <button id="reset" class="button">Reset</button>
       </div>
     </div>
-    <div class="small">기본 도구 목록 + 내 도구(Local) 병합 표시. 로컬에서 자유롭게 추가/삭제할 수 있습니다.</div>
 
-    <h3>도구 목록</h3>
+    <div class="toolbar">
+      <input id="q" class="input" placeholder="Search tools… (title / description)">
+      <span class="tag">Inspire Wood · K‑Mood Hangeul</span>
+    </div>
+
     <div id="list" class="grid"></div>
 
     <hr/>
-    <h3>도구 추가</h3>
+    <h3>새 도구 추가</h3>
     <div class="form">
       <div>
-        <div class="label">제목</div>
-        <input id="title" placeholder="예) Link Maker PRO v2.3">
+        <label>제목</label>
+        <input id="title" class="input" placeholder="예) Link Maker PRO v2.3">
       </div>
       <div>
-        <div class="label">설명</div>
-        <textarea id="desc" placeholder="간단 설명"></textarea>
+        <label>설명</label>
+        <input id="desc" class="input" placeholder="간단 설명">
       </div>
       <div>
-        <div class="label">링크(HREF)</div>
-        <input id="href" placeholder="./my-tool/ or https://...">
+        <label>링크(HREF)</label>
+        <input id="href" class="input" placeholder="./my-tool/ or https://...">
       </div>
-      <button id="add">Add Tool</button>
+      <button id="add" class="button primary">Add Tool</button>
     </div>
-  </div>
-  <script>
-    let defaults = {tools:[]};
-    let storeKey = 'iw_tools_custom';
 
+    <div class="footer">© Inspire Wood — 감성 도구 대시보드</div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const icons = {
+      'link-maker-pro-v2.2':'🔗',
+      'healing-message-maker':'💖'
+    };
+    let defaults = {tools:[]};
+    const storeKey = 'iw_tools_custom';
     async function loadDefaults(){
-      try{
-        const res = await fetch('./registry.json', {cache:'no-store'});
-        defaults = await res.json();
-      }catch(e){ defaults = {tools:[]}; }
+      const res = await fetch('./registry.json', {cache:'no-store'}).catch(()=>null);
+      defaults = res ? await res.json() : {tools:[]};
     }
-    function loadCustom(){
-      const s = localStorage.getItem(storeKey);
-      return s? JSON.parse(s) : {tools:[]};
+    function loadCustom(){ const s = localStorage.getItem(storeKey); return s? JSON.parse(s) : {tools:[]}; }
+    function saveCustom(obj){ localStorage.setItem(storeKey, JSON.stringify(obj)); }
+    function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1200); }
+
+    function iconFor(t){
+      if(t.id && icons[t.id]) return icons[t.id];
+      if(/link/i.test(t.title||'')) return '🔗';
+      if(/heal|message/i.test(t.title||'')) return '💖';
+      if(/qr/i.test(t.title||'')) return '🧾';
+      return '🧰';
     }
-    function saveCustom(obj){
-      localStorage.setItem(storeKey, JSON.stringify(obj));
-    }
+
     function render(){
-      const list = document.getElementById('list');
-      list.innerHTML = '';
+      const query = document.getElementById('q').value.trim().toLowerCase();
+      const list = document.getElementById('list'); list.innerHTML='';
       const merged = [...defaults.tools, ...loadCustom().tools];
-      merged.forEach((t, idx)=>{
-        const card = document.createElement('div');
-        card.className='card';
-        card.innerHTML = '<h3>'+t.title+'</h3><p>'+ (t.desc||'') +'</p>';
+      const filtered = merged.filter(t=> (t.title||'').toLowerCase().includes(query) || (t.desc||'').toLowerCase().includes(query));
+      filtered.forEach((t)=>{
+        const card = document.createElement('div'); card.className='card';
+        const icon = document.createElement('div'); icon.className='icon'; icon.textContent = iconFor(t);
+        const h = document.createElement('h3'); h.textContent = t.title || 'Untitled Tool';
+        const p = document.createElement('p'); p.textContent = t.desc || '';
         const btns = document.createElement('div'); btns.className='btns';
-        const a = document.createElement('a'); a.className='btn'; a.href=t.href; a.textContent='Open'; a.target='_blank'; btns.appendChild(a);
-        const del = document.createElement('button'); del.textContent='Delete'; del.addEventListener('click', ()=>{
+        const open = document.createElement('a'); open.className='btn'; open.textContent='Open'; open.href=t.href; open.target='_blank';
+        const del  = document.createElement('button'); del.className='btn delete'; del.textContent='Delete';
+        del.addEventListener('click', ()=>{
           const c = loadCustom(); const i = c.tools.findIndex(x=>x.title===t.title && x.href===t.href);
-          if(i>=0){ c.tools.splice(i,1); saveCustom(c); render(); }
-          else { alert('기본 도구는 삭제 대신 숨김기능 예정입니다.'); }
-        }); btns.appendChild(del);
-        card.appendChild(btns);
+          if(i>=0){ c.tools.splice(i,1); saveCustom(c); toast('Deleted'); render(); }
+          else { toast('기본 도구는 리포에서 관리됩니다'); }
+        });
+        btns.append(open, del);
+        card.append(icon, h, p, btns);
         list.appendChild(card);
       });
     }
+
     document.getElementById('add').addEventListener('click', ()=>{
       const title = document.getElementById('title').value.trim();
       const desc  = document.getElementById('desc').value.trim();
       const href  = document.getElementById('href').value.trim();
-      if(!title || !href){ alert('제목과 링크는 필수입니다.'); return; }
+      if(!title || !href){ toast('제목/링크 필수'); return; }
       const c = loadCustom(); c.tools.push({title, desc, href}); saveCustom(c);
       document.getElementById('title').value=''; document.getElementById('desc').value=''; document.getElementById('href').value='';
-      render();
+      toast('Added'); render();
     });
     document.getElementById('export').addEventListener('click', ()=>{
       const merged = {tools:[...defaults.tools, ...loadCustom().tools]};
       const blob = new Blob([JSON.stringify(merged, null, 2)], {type:'application/json'});
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='tools_registry_export.json'; a.click();
+      toast('Exported');
     });
     document.getElementById('import').addEventListener('change', (ev)=>{
       const file = ev.target.files[0]; if(!file) return;
@@ -97,12 +126,14 @@
         try{
           const data = JSON.parse(reader.result);
           const customs = data.tools.filter(t=>!defaults.tools.find(d=>d.href===t.href));
-          saveCustom({tools: customs}); render();
-        }catch(e){ alert('JSON 파싱 실패'); }
+          saveCustom({tools: customs}); toast('Imported'); render();
+        }catch(e){ toast('JSON 파싱 실패'); }
       };
       reader.readAsText(file);
     });
-    document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem(storeKey); render(); });
+    document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem(storeKey); toast('Reset'); render(); });
+    document.getElementById('q').addEventListener('input', render);
+
     (async function(){ await loadDefaults(); render(); })();
   </script>
 </body>
