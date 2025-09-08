@@ -24,15 +24,15 @@
     .wrap{max-width:900px;margin:40px auto;padding:24px}
     .card{background:var(--card); border-radius:18px; box-shadow:0 6px 24px rgba(0,0,0,.08); padding:28px}
     .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151;background:#fff8}
-    h1{font-size:clamp(30px,4.8vw,44px);margin:.2em 0 .2em}
-    .han{font-weight:900;font-size:clamp(52px,9vw,84px);letter-spacing:-.02em;margin:.15em 0 .1em}
-    .roman{font-size:clamp(16px,3.2vw,22px);color:#374151;margin:.2em 0}
-    .lead{color:var(--muted)}
-    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    h1{font-size:clamp(30px,4.8vw,44px);margin:.2em 0 .2em;text-align:center}
+    .han{font-weight:900;font-size:clamp(52px,9vw,84px);letter-spacing:-.02em;margin:.15em 0 .1em;text-align:center;}
+    .roman{font-size:clamp(16px,3.2vw,22px);color:#374151;margin:.2em 0;text-align:center;}
+    .lead{color:var(--muted);text-align:center;}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;justify-content:center}
     .button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;text-decoration:none;color:#111;display:inline-flex;align-items:center;justify-content:center}
     .button:hover{border-color:#cbd5e1}
     .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
-    .credits{margin-top:12px; font-size:12px; color:#6b7280}
+    .credits{margin-top:16px; font-size:12px; color:#6b7280; text-align:center; line-height:1.6}
   </style>
 </head>
 <body>
@@ -46,9 +46,12 @@
       <div class="btns">
         <button id="speakKo" class="button">Play TTS (KO)</button>
         <a class="button" href="./healing/?name=Grace&mode=daily">Open Healing Message</a>
-        <a class="button" href="./tools/">Open Tools Dashboard</a>
+        <!-- Tools Dashboard link removed -->
       </div>
-      <div class="credits">Fonts: System UI / Pretendard (OFL)</div>
+      <div class="credits">
+        KR: 출처: 안동엄마까투리체 — 안동시, 공유마당(한국저작권위원회), 공공누리 제1유형(출처표시).<br/>
+        EN: Font: Andong Eomma Katuri — Andong City, via Share-Madang (KOGL Type 1: Attribution).
+      </div>
     </div>
     <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
   </div>
