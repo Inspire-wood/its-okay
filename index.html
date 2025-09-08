@@ -1,174 +1,53 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>괜찮아 — IT’S OKAY</title>
-  <meta name="description" content="See the Korean word, hear its pronunciation, and view the English meaning.">
-  <meta name="theme-color" content="#111111">
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>한글사랑 | It’s Okay — K‑Mood Hangeul Sign</title>
+  <meta name="description" content="Inspire Wood · K‑Mood Hangeul Sign. ‘괜찮아’의 의미를 전하고 발음을 들어보세요.">
+  <meta property="og:title" content="한글사랑 | It’s Okay"/>
+  <meta property="og:description" content="‘괜찮아’ — 위로와 용기의 한국어 표현. 발음 듣기, 간단 공유 지원."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:locale" content="ko_KR"/>
   <style>
-    :root{
-      --font-stack: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Segoe UI', Roboto, Arial, sans-serif;
-      --maxw: 1080px; --radius: 22px; --radius-sm: 14px;
-      --shadow: 0 18px 50px rgba(0,0,0,.10); --shadow-sm: 0 8px 24px rgba(0,0,0,.10);
-      --gap-1: 8px; --gap-2: 12px; --gap-3: 16px; --gap-4: 20px; --gap-5: 24px; --gap-6: 32px;
-      --text-muted: #666; --card-bg: rgba(255,255,255,.8);
-    }
-    *{ box-sizing: border-box }
-    html,body{ height:100%; margin:0 }
-    body{
-      font-family: var(--font-stack);
-      color:#111; line-height:1.55;
-      background:
-        radial-gradient(1200px 800px at 20% 10%, rgba(255,219,219,.60), transparent 60%),
-        radial-gradient(900px 700px at 80% 20%, rgba(204,232,255,.45), transparent 60%),
-        radial-gradient(900px 900px at 50% 100%, rgba(215,255,224,.45), transparent 60%),
-        #f7f8fb;
-    }
-    .wrap{ min-height:100%; padding: clamp(16px, 4vw, 36px); display:flex; justify-content:center }
-    .container{ width:100%; max-width: var(--maxw); display:grid; gap: 12px }
-
-    /* Centered logo */
-    header.header{ margin: 4px auto 0; padding:0; background:transparent; border-radius:0; box-shadow:none; width:max-content; }
-    header.header img{ height: clamp(22px, 2.2vw, 36px); width:auto; display:block }
-
-    main.card{
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: clamp(16px, 4.5vw, 40px);
-      position:relative; overflow:hidden;
-      display:grid; gap: var(--gap-5);
-    }
-    .glow{ position:absolute; width:380px; height:380px; border-radius:50%; background: radial-gradient(closest-side, rgba(255,255,255,.9), rgba(255,255,255,0)); left:-150px; bottom:-150px; filter: blur(2px); animation: float 12s ease-in-out infinite alternate; pointer-events:none; }
-    .glow.r{ left:auto; right:-150px; bottom:auto; top:-150px; transform: scale(1.05); animation-delay: -6s}
-    @keyframes float{ from{ transform: translateY(0)} to{ transform: translateY(16px)} }
-    .hero{ display:grid; gap: var(--gap-2); justify-items: center; text-align:center; }
-    .word{ font-size: clamp(56px, 11vw, 128px); font-weight: 800; letter-spacing: -0.02em; margin: 0; }
-    .grid{ display:grid; grid-template-columns: 1fr; gap: var(--gap-4); }
-    @media (min-width: 760px){ .grid{ grid-template-columns: 1fr 1fr; } }
-    .panel{ background:#fff; border-radius: var(--radius-sm); padding: var(--gap-5); box-shadow: var(--shadow-sm); text-align:center; }
-    .label{ display:block; font-weight:600; opacity:.7; margin-bottom: 6px }
-    .value{ font-weight:800; font-size: clamp(20px, 4vw, 30px); letter-spacing:.01em }
-    .actions{ display:flex; gap: var(--gap-3); flex-wrap: wrap; justify-content: center; }
-    .btn{ font-size:16px; padding:12px 16px; border-radius: 999px; border:0; cursor:pointer; background:#111; color:#fff; box-shadow: var(--shadow-sm); }
-    .btn.secondary{ background:#f2f2f2; color:#111; border:1px solid #e5e5e5 }
-    .hint{ color: var(--text-muted); font-size: 12px; text-align:center }
-    .fallback{ margin-top: 4px; border-radius: var(--radius-sm); padding: var(--gap-4); background: #fff5f5; color:#333; border: 1px solid #f3d1d1; text-align:left; max-width: 760px; margin-left:auto; margin-right:auto; }
-    .fallback h3{ margin:0 0 8px; font-size:16px }
-    .fallback ol{ margin:6px 0 0 18px; padding:0 }
-    .fallback li{ margin:4px 0 }
-    .tools{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap }
-    .toolbtn{ padding:8px 10px; border-radius:10px; border:1px solid #ddd; background:#fff; cursor:pointer; font-size:13px; }
-    .hidden{ display:none }
-    footer.legal{ margin-top: 8px; text-align:center; font-size: 11.5px; color:#999; line-height:1.45 }
+    :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif}
+    .wrap{max-width:880px;margin:40px auto;padding:24px}
+    .card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:28px}
+    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151}
+    h1{font-size:clamp(26px,4vw,36px);margin:.2em 0 .4em}
+    .roman{font-size:clamp(16px,2.8vw,20px);color:#374151;margin:.2em 0}
+    .han{font-weight:900;font-size:clamp(44px,8vw,72px);letter-spacing:-.02em;margin:.3em 0 .1em}
+    .lead{color:#6b7280}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
+    button:hover{border-color:#cbd5e1}
+    .footer{margin-top:20px;color:#6b7280;font-size:13px;text-align:center}
+    .small{font-size:12px;color:#6b7280}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="container">
-      <header class="header" aria-label="Brand">
-        <img src="./logo.png?v=4"
-             srcset="./logo.png?v=4 1x, ./logo@2x.png?v=4 2x"
-             alt="Inspire wood logo">
-      </header>
-
-      <main class="card" role="main">
-        <div class="glow" aria-hidden="true"></div>
-        <div class="glow r" aria-hidden="true"></div>
-
-        <section class="hero" aria-labelledby="k-word">
-          <h1 id="k-word" class="word">괜찮아</h1>
-        </section>
-
-        <section class="grid">
-          <article class="panel" aria-labelledby="pron-label">
-            <span id="pron-label" class="label">Korean pronunciation</span>
-            <span class="value" id="roman-value">gwen&#8209;cha&#8209;na</span>
-          </article>
-          <article class="panel" aria-labelledby="mean-label">
-            <span id="mean-label" class="label">English meaning</span>
-            <span class="value" id="eng-meaning">IT’S OKAY</span>
-          </article>
-        </section>
-
-        <section class="actions">
-          <button class="btn" id="speak-ko" aria-label="Play pronunciation (Korean)">Play pronunciation (Korean)</button>
-          <a class="btn secondary" id="open-new" href="" target="_blank" rel="noopener">Open in browser</a>
-        </section>
-        <p class="hint">On some devices you may need to tap to play. Please check your volume.</p>
-
-        <!-- Bilingual KOGL attribution footer -->
-        <footer class="legal">
-          <div>출처: <b>안동엄마까투리체</b> — 안동시, 공유마당(한국저작권위원회), 공공누리 제1유형(출처표시).</div>
-          <div>Font: <b>Andong Eomma Katuri</b> — Andong City, via Share‑Madang (KOGL Type 1: Attribution).</div>
-        </footer>
-
-        <section id="fallback" class="fallback hidden" aria-live="polite">
-          <h3>Speech output is not supported here.</h3>
-          <ol>
-            <li><b>Open in your default browser</b> — use the menu (⋮) and choose “Open in default browser”. (iPhone: Share → “Open in Safari”)</li>
-            <li><b>Copy link</b> and paste into Chrome/Safari.</li>
-            <li>Ensure <b>Silent mode is off</b> and <b>volume is up</b>.</li>
-          </ol>
-          <div class="tools">
-            <button id="copy-link" class="toolbtn">Copy link</button>
-          </div>
-          <div id="audio-wrap" class="hidden" style="margin-top:10px;">
-            <div style="font-size:13px; margin-bottom:6px;">Alternative: listen via audio file</div>
-            <audio id="ko-audio" controls></audio>
-          </div>
-        </section>
-      </main>
+    <div class="card">
+      <div class="tag">Inspire Wood · K‑Mood Hangeul Sign</div>
+      <h1>한글사랑 <span class="small">K‑Hangeul Love</span></h1>
+      <div class="han" id="han">괜찮아</div>
+      <div class="roman" id="roman">gwaenchana <span class="small">(친숙: 괜차나)</span></div>
+      <p class="lead">“괜찮아”는 위로와 용기를 건네는 따뜻한 한국어 표현입니다.</p>
+      <div class="btns">
+        <button id="speakKo">발음 듣기(ko)</button>
+        <button id="copy">링크 복사</button>
+        <a href="./healing/index.html?name=Grace&mode=daily" style="text-decoration:none">
+          <button>힐링메세지 보기</button>
+        </a>
+      </div>
     </div>
+    <p class="footer">© Inspire Wood — K‑Mood Hangeul Sign</p>
   </div>
-
   <script>
-    const PRESETS = {
-      "its-okay": { ko: "괜찮아", roman: "gwen\u2011cha\u2011na", en: "IT’S OKAY" },
-      "thanks":   { ko: "고마워", roman: "go\u2011ma\u2011wo", en: "THANK YOU" }
-    };
-
-    const params = new URLSearchParams(location.search);
-    const key = params.get('p') || 'its-okay';
-    const base = PRESETS[key] || PRESETS['its-okay'];
-    const ko    = params.get('ko')    || base.ko;
-    const roman = params.get('roman') || base.roman;
-    const en    = params.get('en')    || base.en;
-
-    document.getElementById('k-word').textContent = ko;
-    document.getElementById('roman-value').textContent = roman;
-    document.getElementById('eng-meaning').textContent = en;
-
-    document.title = ko + ' — ' + en;
-    const md = document.querySelector('meta[name="description"]');
-    if (md) md.setAttribute('content', `See ‘${ko}’, hear the Korean pronunciation, and view the English meaning (${en}).`);
-
-    const ua = navigator.userAgent || "";
-    const isInApp = /(KAKAOTALK|KAKAOTALK_iOS|NAVER|DaumApps|FBAN|FBAV|Instagram|Line)/i.test(ua);
-    const ttsSupported = ('speechSynthesis' in window && typeof window.SpeechSynthesisUtterance === 'function');
-
-    function showFallback(){
-      const fb = document.getElementById('fallback'); fb.classList.remove('hidden');
-      const openNew = document.getElementById('open-new'); openNew.href = location.href;
-      const copyBtn = document.getElementById('copy-link');
-      if (copyBtn) { copyBtn.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(location.href); alert('Link copied.'); }
-        catch(e){ prompt('Copy failed. Manually copy the link below:', location.href); }
-      }); }
-    }
-
-    (function(){
-      const play = (text, lang='ko-KR') => {
-        if (!ttsSupported || isInApp) { showFallback(); return; }
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = lang; u.rate = 1.0;
-        window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
-      };
-      document.getElementById('speak-ko').addEventListener('click', () => play(ko, 'ko-KR'));
-      document.getElementById('open-new').href = location.href;
-      if (!ttsSupported || isInApp) showFallback();
-    })();
+    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
+    document.getElementById('speakKo').addEventListener('click',()=>speak('괜찮아','ko-KR'));
+    document.getElementById('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); }catch(e){ alert('Copy failed'); } });
   </script>
 </body>
 </html>
