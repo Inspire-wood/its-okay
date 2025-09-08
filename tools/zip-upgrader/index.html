@@ -1,23 +1,94 @@
 <!DOCTYPE html>
-<html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>ZIP 업그레이더</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Arial,sans-serif;margin:0;background:#faf7f4;color:#111}
-.wrap{max-width:960px;margin:40px auto;padding:0 24px}.btn{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:700}
-.input{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 12px;min-width:220px}.panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 6px 20px rgba(0,0,0,.06)}
-.list{max-height:320px;overflow:auto;border:1px dashed #cbd5e1;border-radius:12px;padding:10px;background:#f8fafc}.row{display:flex;gap:10px;flex-wrap:wrap;margin:.5rem 0}
-.log{font-family:monospace;font-size:12px;background:#0b1020;color:#e5e7eb;border-radius:10px;padding:10px;min-height:140px;white-space:pre-wrap}</style></head>
-<body><div class="wrap"><h1>ZIP 업그레이더</h1>
-<div class="panel"><h3>1) ZIP 업로드</h3><label class="btn" style="cursor:pointer">Choose ZIP<input id="zip" type="file" accept=".zip" style="display:none"></label><div id="filelist" class="list">ZIP 파일을 선택하세요.</div></div>
-<div class="panel"><h3>2) 설치 경로 & 선택</h3><div class="row"><div><div>Base</div><input id="base" class="input" value="/its-okay/"></div>
-<div><div>Strip prefix</div><input id="strip" class="input" placeholder="its-okay/"></div></div></div>
-<div class="panel"><h3>3A) 로컬 재패키징</h3><button id="download" class="btn">Download Selected as ZIP</button></div>
-<div class="panel"><h3>3B) GitHub로 커밋(고급)</h3><div class="row"><input id="owner" class="input" placeholder="inspire-wood"><input id="repo" class="input" placeholder="its-okay"><input id="branch" class="input" value="main"><input id="token" class="input" type="password" placeholder="ghp_..."></div><button id="push" class="btn">Push Selected via API</button><div id="log" class="log"></div></div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script>const $=s=>document.querySelector(s); const log=m=>{const el=$('#log'); el.textContent+=(m+'\n'); el.scrollTop=el.scrollHeight;}; let zipObj=null; $('#zip').addEventListener('change', async ev=>{const f=ev.target.files[0]; if(!f) return; const buf=await f.arrayBuffer(); const z=await JSZip.loadAsync(buf); zipObj=z; const c=$('#filelist'); c.innerHTML=''; Object.keys(z.files).sort().forEach(name=>{const file=z.files[name]; if(file.dir) return; const row=document.createElement('div'); const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.dataset.name=name; const lab=document.createElement('label'); lab.textContent=' '+name; row.append(cb,lab); c.appendChild(row);}); });
-const sel=()=>Array.from(document.querySelectorAll('#filelist input[type=checkbox]')).filter(cb=>cb.checked).map(cb=>cb.dataset.name);
-const remap=p=>{ const strip=$('#strip').value.trim(); const base=$('#base').value.trim().replace(/\\+/g,'/'); let path=p; if(strip && path.startsWith(strip)) path=path.slice(strip.length); if(path.startsWith('/')) path=path.slice(1); return base.replace(/\\+/g,'/').replace(/\/*$/,'/')+path; };
-$('#download').onclick=async()=>{ if(!zipObj) return alert('ZIP 먼저 선택'); const s=sel(); if(!s.length) return alert('선택 없음'); const out=new JSZip(); for(const n of s){ const data=await zipObj.file(n).async('uint8array'); const mapped=remap(n).replace(/^\//,''); out.file(mapped, data);} const blob=await out.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='iw_merged.zip'; a.click(); };
-async function ghGet(owner,repo,branch,path){ const url=`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`+`?ref=${encodeURIComponent(branch)}`; const res=await fetch(url,{headers:{'Accept':'application/vnd.github+json'}}); return res.status===200? await res.json(): null; }
-async function ghPut(owner,repo,branch,path,contentB64,message,token,sha=null){ const url=`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`; const body={message,content:contentB64,branch}; if(sha) body.sha=sha; const res=await fetch(url,{method:'PUT',headers:{'Accept':'application/vnd.github+json','Authorization':`Bearer ${token}`},body:JSON.stringify(body)}); if(!res.ok){throw new Error('HTTP '+res.status+' '+await res.text());} return await res.json(); }
-$('#push').onclick=async()=>{ if(!zipObj) return alert('ZIP 먼저 선택'); const owner=$('#owner').value.trim(), repo=$('#repo').value.trim(), branch=$('#branch').value.trim(), token=$('#token').value.trim(); if(!owner||!repo||!branch||!token) return alert('필드 확인'); const s=sel(); if(!s.length) return alert('선택 없음'); log('▶ '+s.length+'개 업로드 시작'); for(const n of s){ const data=await zipObj.file(n).async('uint8array'); const mapped=remap(n).replace(/^\//,''); const b64=btoa(String.fromCharCode(...data)); try{ const cur=await ghGet(owner,repo,branch,mapped); const sha=cur&&cur.sha?cur.sha:null; await ghPut(owner,repo,branch,mapped,b64,`chore: upgrade via Zip Upgrader (${n} → ${mapped})`,token,sha); log('✓ '+mapped);}catch(e){ log('✗ '+mapped+' — '+e.message); break; } } log('◎ 완료'); };</script>
-</body></html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ZIP 업그레이더 v1.1</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Arial,sans-serif;margin:0;background:#faf7f4;color:#111}
+    .wrap{max-width:960px;margin:40px auto;padding:0 24px}
+    .btn{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:8px 12px;cursor:pointer;font-weight:700}
+    .input{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 12px;min-width:220px}
+    .panel{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 6px 20px rgba(0,0,0,.06)}
+    .list{max-height:320px;overflow:auto;border:1px dashed #cbd5e1;border-radius:12px;padding:10px;background:#f8fafc}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin:.5rem 0}
+    .log{font-family:monospace;font-size:12px;background:#0b1020;color:#e5e7eb;border-radius:10px;padding:10px;min-height:140px;white-space:pre-wrap}
+    .error{border-color:#ef4444 !important; box-shadow:0 0 0 2px rgba(239,68,68,.15)}
+    .note{font-size:12px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>ZIP 업그레이더 <span class="note">v1.1</span></h1>
+    <div class="panel">
+      <h3>1) ZIP 업로드</h3>
+      <label class="btn" style="cursor:pointer">Choose ZIP<input id="zip" type="file" accept=".zip" style="display:none"></label>
+      <div id="filelist" class="list">ZIP 파일을 선택하세요.</div>
+    </div>
+    <div class="panel">
+      <h3>2) 설치 경로 & 선택</h3>
+      <div class="row">
+        <div><div class="note">Base</div><input id="base" class="input" value="/its-okay/"></div>
+        <div><div class="note">Strip prefix</div><input id="strip" class="input" placeholder="its-okay/"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>3A) 로컬 재패키징</h3>
+      <button id="download" class="btn">Download Selected as ZIP</button>
+    </div>
+    <div class="panel">
+      <h3>3B) GitHub로 커밋(고급)</h3>
+      <div class="row">
+        <input id="owner" class="input" value="inspire-wood" aria-label="owner">
+        <input id="repo" class="input" value="its-okay" aria-label="repo">
+        <input id="branch" class="input" value="main" aria-label="branch">
+        <input id="token" class="input" type="password" placeholder="ghp_..." aria-label="token">
+        <label class="note" style="display:flex;align-items:center;gap:6px"><input id="remember" type="checkbox">Remember (local)</label>
+      </div>
+      <button id="push" class="btn">Push Selected via API</button>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    const $=s=>document.querySelector(s); const log=m=>{const el=$('#log'); el.textContent+=(m+'\n'); el.scrollTop=el.scrollHeight;};
+    (function(){ const s=localStorage.getItem('iw_zip_creds'); if(!s) return; try{ const o=JSON.parse(s); if(o.owner) $('#owner').value=o.owner; if(o.repo) $('#repo').value=o.repo; if(o.branch) $('#branch').value=o.branch; if(o.token){ $('#token').value=o.token; $('#remember').checked=true; } }catch(e){} })();
+    function saveCreds(){ if($('#remember').checked){ localStorage.setItem('iw_zip_creds', JSON.stringify({owner:$('#owner').value, repo:$('#repo').value, branch:$('#branch').value, token:$('#token').value})); } else { localStorage.removeItem('iw_zip_creds'); } }
+
+    let zipObj=null;
+    $('#zip').addEventListener('change', async ev=>{ const f=ev.target.files[0]; if(!f) return; const buf=await f.arrayBuffer(); const z=await JSZip.loadAsync(buf); zipObj=z;
+      const c=$('#filelist'); c.innerHTML=''; Object.keys(z.files).sort().forEach(name=>{ const file=z.files[name]; if(file.dir) return;
+        const row=document.createElement('div'); const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.dataset.name=name; const lab=document.createElement('label'); lab.textContent=' '+name; row.append(cb,lab); c.appendChild(row); });
+    });
+    const sel=()=>Array.from(document.querySelectorAll('#filelist input[type=checkbox]')).filter(cb=>cb.checked).map(cb=>cb.dataset.name);
+    const remap=p=>{ const strip=$('#strip').value.trim(); const base=$('#base').value.trim().replace(/\\+/g,'/'); let path=p; if(strip && path.startsWith(strip)) path=path.slice(strip.length); if(path.startsWith('/')) path=path.slice(1); return base.replace(/\\+/g,'/').replace(/\/*$/,'/')+path; };
+
+    $('#download').onclick=async()=>{ if(!zipObj){ alert('ZIP 먼저 선택'); return; } const s=sel(); if(!s.length){ alert('선택 없음'); return; }
+      const out=new JSZip(); for(const n of s){ const data=await zipObj.file(n).async('uint8array'); out.file(remap(n).replace(/^\//,''), data); }
+      const blob=await out.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='iw_merged.zip'; a.click();
+    };
+
+    async function ghGet(owner,repo,branch,path){ const url=`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`+`?ref=${encodeURIComponent(branch)}`; const res=await fetch(url,{headers:{'Accept':'application/vnd.github+json'}}); return res.status===200? await res.json(): null; }
+    async function ghPut(owner,repo,branch,path,contentB64,message,token,sha=null){ const url=`https://api.github.com/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g,'/')}`; const body={message,content:contentB64,branch}; if(sha) body.sha=sha; const res=await fetch(url,{method:'PUT',headers:{'Accept':'application/vnd.github+json','Authorization':`Bearer ${token}`},body:JSON.stringify(body)}); if(!res.ok){throw new Error('HTTP '+res.status+' '+await res.text());} return await res.json(); }
+
+    function requireFields(...els){ let missing=[]; els.forEach(el=>{ el.classList.remove('error'); if(!el.value.trim()){ missing.push(el.getAttribute('aria-label')||el.id); el.classList.add('error'); } }); return missing; }
+
+    $('#push').onclick=async()=>{
+      if(!zipObj){ alert('ZIP 먼저 선택'); return; }
+      const owner=$('#owner'), repo=$('#repo'), branch=$('#branch'), token=$('#token');
+      const missing=requireFields(owner, repo, branch, token); if(missing.length){ alert('필수 입력: '+missing.join(', ')); return; }
+      saveCreds();
+      const s=sel(); if(!s.length){ alert('선택 없음'); return; }
+      log('▶ '+s.length+'개 업로드 시작');
+      for(const n of s){
+        const data=await zipObj.file(n).async('uint8array'); const mapped=remap(n).replace(/^\//,''); const b64=btoa(String.fromCharCode(...data));
+        try{ const cur=await ghGet(owner.value.trim(),repo.value.trim(),branch.value.trim(),mapped); const sha=cur&&cur.sha?cur.sha:null;
+             await ghPut(owner.value.trim(),repo.value.trim(),branch.value.trim(),mapped,b64,`chore: upgrade via Zip Upgrader (${n} → ${mapped})`,token.value.trim(),sha);
+             log('✓ '+mapped);
+        }catch(e){ log('✗ '+mapped+' — '+e.message); break; }
+      }
+      log('◎ 완료');
+    };
+  </script>
+</body>
+</html>
