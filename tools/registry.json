@@ -1,0 +1,16 @@
+{
+  "tools": [
+    {
+      "id": "link-maker-pro-v2.2",
+      "title": "Link Maker PRO v2.2",
+      "desc": "Build short links and QR for It’s Okay / Healing pages.",
+      "href": "./link-maker-pro-v2.2/"
+    },
+    {
+      "id": "healing-message-maker",
+      "title": "힐링메세지 메이커",
+      "desc": "Compose name/message or daily mode and generate a link + QR.",
+      "href": "./healing-message-maker/"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Tools Dashboard — Inspire Wood</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1>Tools Dashboard</h1>
+      <div>
+        <a class="btn" href="../">← Back to It’s Okay</a>
+        <button id="export" class="btn">Export JSON</button>
+        <label class="btn" style="cursor:pointer">Import JSON<input id="import" type="file" accept="application/json" style="display:none"></label>
+        <button id="reset" class="btn">Reset</button>
+      </div>
+    </div>
+    <div class="small">기본 도구 목록 + 내 도구(Local) 병합 표시. 로컬에서 자유롭게 추가/삭제할 수 있습니다.</div>
+
+    <h3>도구 목록</h3>
+    <div id="list" class="grid"></div>
+
+    <hr/>
+    <h3>도구 추가</h3>
+    <div class="form">
+      <div>
+        <div class="label">제목</div>
+        <input id="title" placeholder="예) Link Maker PRO v2.3">
+      </div>
+      <div>
+        <div class="label">설명</div>
+        <textarea id="desc" placeholder="간단 설명"></textarea>
+      </div>
+      <div>
+        <div class="label">링크(HREF)</div>
+        <input id="href" placeholder="./my-tool/ or https://...">
+      </div>
+      <button id="add">Add Tool</button>
+    </div>
+  </div>
+  <script>
+    let defaults = {tools:[]};
+    let storeKey = 'iw_tools_custom';
+
+    async function loadDefaults(){
+      try{
+        const res = await fetch('./registry.json', {cache:'no-store'});
+        defaults = await res.json();
+      }catch(e){ defaults = {tools:[]}; }
+    }
+    function loadCustom(){
+      const s = localStorage.getItem(storeKey);
+      return s? JSON.parse(s) : {tools:[]};
+    }
+    function saveCustom(obj){
+      localStorage.setItem(storeKey, JSON.stringify(obj));
+    }
+    function render(){
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      const merged = [...defaults.tools, ...loadCustom().tools];
+      merged.forEach((t, idx)=>{
+        const card = document.createElement('div');
+        card.className='card';
+        card.innerHTML = '<h3>'+t.title+'</h3><p>'+ (t.desc||'') +'</p>';
+        const btns = document.createElement('div'); btns.className='btns';
+        const a = document.createElement('a'); a.className='btn'; a.href=t.href; a.textContent='Open'; a.target='_blank'; btns.appendChild(a);
+        const del = document.createElement('button'); del.textContent='Delete'; del.addEventListener('click', ()=>{
+          const c = loadCustom(); const i = c.tools.findIndex(x=>x.title===t.title && x.href===t.href);
+          if(i>=0){ c.tools.splice(i,1); saveCustom(c); render(); }
+          else { alert('기본 도구는 삭제 대신 숨김기능 예정입니다.'); }
+        }); btns.appendChild(del);
+        card.appendChild(btns);
+        list.appendChild(card);
+      });
+    }
+    document.getElementById('add').addEventListener('click', ()=>{
+      const title = document.getElementById('title').value.trim();
+      const desc  = document.getElementById('desc').value.trim();
+      const href  = document.getElementById('href').value.trim();
+      if(!title || !href){ alert('제목과 링크는 필수입니다.'); return; }
+      const c = loadCustom(); c.tools.push({title, desc, href}); saveCustom(c);
+      document.getElementById('title').value=''; document.getElementById('desc').value=''; document.getElementById('href').value='';
+      render();
+    });
+    document.getElementById('export').addEventListener('click', ()=>{
+      const merged = {tools:[...defaults.tools, ...loadCustom().tools]};
+      const blob = new Blob([JSON.stringify(merged, null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='tools_registry_export.json'; a.click();
+    });
+    document.getElementById('import').addEventListener('change', (ev)=>{
+      const file = ev.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        try{
+          const data = JSON.parse(reader.result);
+          const customs = data.tools.filter(t=>!defaults.tools.find(d=>d.href===t.href));
+          saveCustom({tools: customs}); render();
+        }catch(e){ alert('JSON 파싱 실패'); }
+      };
+      reader.readAsText(file);
+    });
+    document.getElementById('reset').addEventListener('click', ()=>{ localStorage.removeItem(storeKey); render(); });
+    (async function(){ await loadDefaults(); render(); })();
+  </script>
+</body>
+</html>

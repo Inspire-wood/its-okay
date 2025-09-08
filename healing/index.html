@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Healing Message — K-Mood Hangeul Sign</title>
-  <meta name="description" content="Personalize a name and a healing note, or use daily mode. Link Maker PRO v2.2 integrated.">
+  <meta name="description" content="Personalize a name and a healing note, or use daily mode.">
   <link rel="icon" href="/its-okay/assets/icons/favicon.ico">
   <link rel="apple-touch-icon" href="/its-okay/assets/icons/apple-touch-icon-180.png" sizes="180x180">
   <style>
@@ -23,7 +23,6 @@
     .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
     .small{font-size:12px;color:#6b7280}
   </style>
-  <link rel="stylesheet" href="/its-okay/tools/link-maker-pro-v2.2/linkmaker.css">
 </head>
 <body>
   <div class="wrap">
@@ -38,6 +37,7 @@
       <div class="btns">
         <button id="speakKo" class="button">Play TTS (KO)</button>
         <button id="speakEn" class="button">Play TTS (EN)</button>
+        <a class="button" href="../tools/">Open Tools Dashboard</a>
       </div>
       <p class="small">Add <code>?name=Grace&mode=daily</code> for daily message rotation. Or set <code>?msg=...</code>.</p>
     </div>
@@ -45,7 +45,7 @@
   </div>
   <script>
     function qs(k){ return new URL(location.href).searchParams.get(k) || ''; }
-    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
+    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate = 1; u.pitch = 1; speechSynthesis.speak(u); }
     const MESSAGES = [
       {ko:'괜찮아', en:"It's okay"},
       {ko:'고마워', en:'Thank you'},
@@ -56,24 +56,17 @@
       {ko:'기다릴게', en:'I will wait for you'},
       {ko:'천천히 가도 돼', en:"It's okay to go slow"}
     ];
-    function dailyPick(){ const d=new Date(); const seed = d.getFullYear()*372 + (d.getMonth()+1)*31 + d.getDate(); return MESSAGES[seed % MESSAGES.length]; }
+    function dailyPick(){ const d=new Date(); const seed=d.getFullYear()*372+(d.getMonth()+1)*31+d.getDate(); return MESSAGES[seed % MESSAGES.length]; }
     const nameIn=document.getElementById('name'), msgIn=document.getElementById('msg'), toOut=document.getElementById('toOut'), msgOut=document.getElementById('msgOut');
     function render(){
-      const name = nameIn.value.trim() || 'Grace';
-      let msg = msgIn.value.trim();
-      const mode = (qs('mode')||'').toLowerCase();
-      if(!msg){
-        if(mode==='daily'){ const pick = dailyPick(); msg = pick.ko + ' / ' + pick.en; }
-        else { msg = qs('msg') || "It's okay."; }
-      }
-      toOut.textContent = 'To. ' + name; msgOut.textContent = msg;
+      const name=nameIn.value.trim()||'Grace'; let msg=msgIn.value.trim(); const mode=(qs('mode')||'').toLowerCase();
+      if(!msg){ msg = (mode==='daily') ? (dailyPick().ko + ' / ' + dailyPick().en) : (qs('msg') || "It's okay."); }
+      toOut.textContent='To. '+name; msgOut.textContent=msg;
     }
-    nameIn.value = qs('name') || 'Grace'; msgIn.value  = qs('msg')  || ''; render();
+    nameIn.value=qs('name')||'Grace'; msgIn.value=qs('msg')||''; render();
     nameIn.addEventListener('input', render); msgIn.addEventListener('input', render);
     document.getElementById('speakKo').addEventListener('click', ()=>speak(msgOut.textContent,'ko-KR'));
     document.getElementById('speakEn').addEventListener('click', ()=>speak(msgOut.textContent,'en-US'));
   </script>
-  <script src="/its-okay/tools/link-maker-pro-v2.2/linkmaker.js"></script>
-  <script> LinkMakerPro.init({ defaultSlug:'healing', isHealing:true }); </script>
 </body>
 </html>
