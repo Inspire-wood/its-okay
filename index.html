@@ -1,58 +1,88 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>한글사랑 | It’s Okay — K-Mood Hangeul Sign</title>
-  <meta name="description" content="Inspire Wood · K-Mood Hangeul Sign. ‘괜찮아’의 의미를 전하고 발음을 들어보세요.">
+  <title>It’s Okay — K‑Mood Hangeul Sign</title>
+  <meta name="description" content="Inspire Wood · K‑Mood Hangeul Sign. Hear the Hangul pronunciation of ‘괜찮아’ and open the healing message page.">
   <meta name="theme-color" content="#111111">
+  <!-- Icons (optional if already uploaded) -->
   <link rel="icon" href="/its-okay/assets/icons/favicon.ico">
   <link rel="apple-touch-icon" href="/its-okay/assets/icons/apple-touch-icon-180.png" sizes="180x180">
-  <meta property="og:title" content="한글사랑 | It’s Okay — K-Mood Hangeul Sign">
-  <meta property="og:description" content="‘괜찮아’ — 위로와 용기의 표현. TTS와 공유를 지원합니다.">
+  <!-- Open Graph -->
+  <meta property="og:title" content="It’s Okay — K‑Mood Hangeul Sign">
+  <meta property="og:description" content="Warm encouragement in Hangul. Play TTS and open the healing message page.">
   <meta property="og:image" content="https://inspire-wood.github.io/its-okay/assets/og/k-hangeul-love_og.png">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ko_KR">
   <meta name="twitter:card" content="summary_large_image">
   <style>
-    :root{--bg:#f8f5f2;--ink:#111;--muted:#6b7280}
-    html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif}
-    .wrap{max-width:880px;margin:40px auto;padding:24px}
-    .card{background:#fff;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);padding:28px}
-    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151}
-    h1{font-size:clamp(26px,4vw,36px);margin:.2em 0 .4em}
-    .roman{font-size:clamp(16px,2.8vw,20px);color:#374151;margin:.2em 0}
-    .han{font-weight:900;font-size:clamp(44px,8vw,72px);letter-spacing:-.02em;margin:.3em 0 .1em}
-    .lead{color:#6b7280}
-    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600}
-    button:hover{border-color:#cbd5e1}
-    .footer{margin-top:20px;color:#6b7280;font-size:13px;text-align:center}
+    :root{
+      --bg:#faf7f4; --ink:#111; --muted:#6b7280; --card:#ffffff;
+      --accent:#0ea5e9; --brand:#111;
+      --ff: system-ui,-apple-system,Segoe UI,Roboto,Pretendard,Apple SD Gothic Neo,Helvetica,Arial,sans-serif;
+    }
+    html,body{margin:0;padding:0;height:100%;font-family:var(--ff);color:var(--ink)}
+    /* 1) 감성적인 배경 디자인 (레이어드 그라디언트 + 은은한 텍스처) */
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% 0%, #fffdfa 0%, rgba(255,253,250,0) 60%),
+        radial-gradient(900px 500px at 90% 100%, #f3eee8 0%, rgba(243,238,232,0) 55%),
+        linear-gradient(180deg, #faf7f4 0%, #f4efe9 100%);
+      position:relative;
+    }
+    body::after{
+      content:""; position:fixed; inset:0; pointer-events:none; opacity:.06;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(0,0,0,.9) 0 1px, transparent 1px 2px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.6) 0 1px, transparent 1px 2px);
+      mix-blend-mode:multiply;
+    }
+    .wrap{max-width:900px;margin:40px auto;padding:24px}
+    .card{
+      background:var(--card); border-radius:18px; box-shadow:0 6px 24px rgba(0,0,0,.08);
+      padding:28px; backdrop-filter:saturate(1.1) blur(0.5px);
+    }
+    .tag{display:inline-block;border:1px solid #e5e7eb;border-radius:999px;padding:6px 10px;margin-right:8px;font-size:12px;color:#374151;background:#fff8}
+    h1{font-size:clamp(30px,4.8vw,44px);margin:.2em 0 .2em}
+    .han{font-weight:900;font-size:clamp(52px,9vw,84px);letter-spacing:-.02em;margin:.15em 0 .1em}
+    .roman{font-size:clamp(16px,3.2vw,22px);color:#374151;margin:.2em 0}
+    .lead{color:var(--muted)}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .button{border:1px solid #e5e7eb;background:#fff;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:700;text-decoration:none;color:#111;display:inline-flex;align-items:center;justify-content:center}
+    .button:hover{border-color:#cbd5e1}
+    .footer{margin-top:24px;color:#6b7280;font-size:13px;text-align:center}
     .small{font-size:12px;color:#6b7280}
+    .credits{margin-top:12px; font-size:12px; color:#6b7280}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <div class="tag">Inspire Wood · K-Mood Hangeul Sign</div>
-      <h1>한글사랑 <span class="small">K-Hangeul Love</span></h1>
+      <div class="tag">Inspire Wood · K‑Mood Hangeul Sign</div>
+      <!-- 2) '한글사랑' 삭제: 메인 타이틀은 영어만 -->
+      <h1>It’s Okay</h1>
+
       <div class="han" id="han">괜찮아</div>
-      <div class="roman" id="roman">gwaenchana <span class="small">(친숙: 괜차나)</span></div>
-      <p class="lead">“괜찮아”는 위로와 용기를 건네는 따뜻한 한국어 표현입니다.</p>
+      <!-- 3) 영문표기: gwen‑cha‑na (하이픈 적용, NB hyphen U+2011) -->
+      <div class="roman" id="roman">gwen‑cha‑na</div>
+
+      <p class="lead">A gentle Korean phrase that says, “It’s okay.” Give yourself a soft nod today.</p>
+
       <div class="btns">
-        <button id="speakKo">발음 듣기(ko)</button>
-        <button id="copy">링크 복사</button>
-        <a href="./healing/?name=Grace&mode=daily" style="text-decoration:none">
-          <button>힐링메세지 보기</button>
-        </a>
+        <!-- 4) 버튼 한글 > 영문으로 / 5) 링크복사 삭제 -->
+        <button id="speakKo" class="button">Play TTS (KO)</button>
+        <a class="button" href="./healing/?name=Grace&mode=daily">Open Healing Message</a>
       </div>
+
+      <!-- 6) 글꼴 표기 -->
+      <div class="credits">Fonts: System UI / Pretendard (OFL) — add or replace as needed.</div>
     </div>
-    <p class="footer">© Inspire Wood — K-Mood Hangeul Sign</p>
+    <p class="footer">© Inspire Wood — K‑Mood Hangeul Sign</p>
   </div>
   <script>
-    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
+    function speak(text, lang){ if(!('speechSynthesis' in window)){ alert('TTS not supported'); return; } window.speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=1; u.pitch=1; speechSynthesis.speak(u); }
     document.getElementById('speakKo').addEventListener('click',()=>speak('괜찮아','ko-KR'));
-    document.getElementById('copy').addEventListener('click', async ()=>{ try{ await navigator.clipboard.writeText(location.href); }catch(e){ alert('Copy failed'); } });
   </script>
 </body>
 </html>
