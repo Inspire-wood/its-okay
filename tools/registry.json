@@ -11,6 +11,12 @@
       "title": "힐링메세지 메이커",
       "desc": "Compose name/message or daily mode and generate a link.",
       "href": "./healing-message-maker/"
+    },
+    {
+      "id": "zip-upgrader",
+      "title": "ZIP 업그레이더",
+      "desc": "ZIP 업로드 → /its-okay/ 재패키징 or GitHub 커밋.",
+      "href": "./zip-upgrader/"
     }
   ]
 }
