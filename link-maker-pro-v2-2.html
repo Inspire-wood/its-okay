@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Link Maker Pro v2.2 — with Font Credit</title>
+  <style>
+    :root { --bg:#0f1115; --card:#171a21; --muted:#9aa4b2; --text:#e6eaf0; --accent:#4da3ff; --line:#252a33;}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple SD Gothic Neo, '맑은 고딕', 'Malgun Gothic', 'Helvetica Neue', Arial, 'Noto Sans KR', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+      background:linear-gradient(135deg,#1b2735 0%,#090a0f 100%);
+      color:var(--text);
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .card{
+      width:min(900px,100%); background:var(--card); border:1px solid var(--line);
+      border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      padding:20px 20px 8px 20px;
+    }
+    .row{display:flex; gap:12px; flex-wrap:wrap; align-items:center}
+    .row > *{flex:1 1 240px}
+    .title{font-size:22px; font-weight:700; display:flex; justify-content:space-between; align-items:center; margin:6px 0 14px}
+    .muted{color:var(--muted); font-size:13px}
+    label{display:block; font-size:13px; color:var(--muted); margin:8px 0 6px}
+    input[type="text"], textarea{
+      width:100%; padding:12px 12px; border-radius:10px; border:1px solid var(--line); background:#0f1320; color:var(--text);
+      outline:none;
+    }
+    textarea{min-height:88px; resize:vertical}
+    .btn{
+      appearance:none; border:1px solid var(--line); background:#0f1320; color:var(--text);
+      padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600;
+    }
+    .btn:hover{border-color:#2e3643}
+    .btn.accent{background:var(--accent); color:#071018; border-color:transparent}
+    .hr{height:1px; background:var(--line); margin:14px 0}
+    .footer-note{font-size:12px; color:var(--muted)}
+    .flex-between{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+  </style>
+</head>
+<body>
+  <div class="card" id="app">
+    <div class="title">
+      <span>Link Maker Pro <span class="muted">v2.2</span></span>
+      <button class="btn" id="btnCopyAll" title="현재 입력값을 한 번에 복사">한 번에 복사</button>
+    </div>
+
+    <!-- 기존 레이아웃은 그대로 유지되었다고 가정합니다. 아래는 대표 필드 예시입니다. -->
+    <div class="row">
+      <div>
+        <label for="title">타이틀</label>
+        <input id="title" type="text" placeholder="예: 괜찮아 (It’s okay)" />
+      </div>
+      <div>
+        <label for="slug">슬러그/링크</label>
+        <input id="slug" type="text" placeholder="예: its-okay" />
+      </div>
+    </div>
+
+    <label for="desc">설명(옵션)</label>
+    <textarea id="desc" placeholder="예: 힐링사인 링크 메이커 — 한글 감성 타이포 랜딩 템플릿"></textarea>
+
+    <div class="hr"></div>
+
+    <!-- ✅ 추가: 카드 하단에만 '폰트 출처(Font Credit)' 입력란 -->
+    <div id="font-credit-wrap">
+      <div class="flex-between">
+        <label for="fontCredit" style="margin:0">폰트 출처 (Font Credit)</label>
+        <span class="muted">입력값은 자동 저장됩니다.</span>
+      </div>
+      <input id="fontCredit" type="text" placeholder="예: Noto Sans KR (Google Fonts) — https://fonts.google.com/specimen/Noto+Sans+KR" />
+      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" id="btnCopyCredit">폰트 출처만 복사</button>
+        <button class="btn" id="btnClearCredit">지우기</button>
+      </div>
+      <p class="footer-note" style="margin-top:10px">가이드: 상업적 이용이 가능한 무료 폰트만 사용하세요. 출처/라이선스 페이지 링크를 함께 남겨두면 좋습니다.</p>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="muted footer-note">
+      배포 팁 — Zip 업그레이더: <b>Base:</b> /, <b>Strip prefix:</b> (빈칸), <b>파일:</b> <code>link-maker-pro-v2-2.html</code> 선택 → <b>Push</b><br>
+      GitHub 웹 UI: ZIP을 풀어 <code>link-maker-pro-v2-2.html</code>만 커밋하세요.
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const $ = (sel) => document.querySelector(sel);
+      const inputs = {
+        title: $('#title'),
+        slug: $('#slug'),
+        desc: $('#desc'),
+        fontCredit: $('#fontCredit')
+      };
+
+      const KEY = 'linkmaker_v22_fields';
+      const load = () => {
+        try{
+          const raw = localStorage.getItem(KEY);
+          if(!raw) return;
+          const data = JSON.parse(raw);
+          Object.keys(inputs).forEach(k => {
+            if(data[k] !== undefined && data[k] !== null) inputs[k].value = data[k];
+          });
+        }catch(e){}
+      };
+      const save = () => {
+        try{
+          const data = {};
+          Object.keys(inputs).forEach(k => data[k] = inputs[k].value || '');
+          localStorage.setItem(KEY, JSON.stringify(data));
+        }catch(e){}
+      };
+
+      // Auto-save on input
+      Object.values(inputs).forEach(el => el.addEventListener('input', save));
+      load();
+
+      // Copy helpers
+      const copyText = async (text) => {
+        try{
+          await navigator.clipboard.writeText(text);
+          alert('복사되었습니다.');
+        }catch(e){
+          // fallback
+          const t = document.createElement('textarea');
+          t.value = text;
+          document.body.appendChild(t);
+          t.select();
+          document.execCommand('copy');
+          document.body.removeChild(t);
+          alert('복사되었습니다.');
+        }
+      };
+
+      // One-shot copy (all main fields)
+      $('#btnCopyAll').addEventListener('click', () => {
+        const payload = {
+          title: inputs.title.value || '',
+          slug: inputs.slug.value || '',
+          desc: inputs.desc.value || '',
+          fontCredit: inputs.fontCredit.value || ''
+        };
+        const text = [
+          `Title: ${payload.title}`,
+          `Slug: ${payload.slug}`,
+          `Desc: ${payload.desc}`,
+          `Font Credit: ${payload.fontCredit}`
+        ].join('\n');
+        copyText(text);
+      });
+
+      // Copy only font credit
+      $('#btnCopyCredit').addEventListener('click', () => {
+        copyText(inputs.fontCredit.value || '');
+      });
+      // Clear credit
+      $('#btnClearCredit').addEventListener('click', () => {
+        inputs.fontCredit.value = '';
+        save();
+      });
+    })();
+  </script>
+</body>
+</html>
