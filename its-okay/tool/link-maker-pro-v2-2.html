@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link Maker PRO v2.2 — Inspire‑wood</title>
+<meta name="theme-color" content="#111111">
+<style>
+  :root{
+    --maxw: 860px; --radius: 16px; --shadow: 0 12px 36px rgba(0,0,0,.08);
+    --muted:#666;
+  }
+  *{ box-sizing: border-box }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial, sans-serif;
+    background:
+      radial-gradient(1000px 700px at 20% 10%, rgba(255,219,219,.5), transparent 60%),
+      radial-gradient(800px 600px at 80% 20%, rgba(204,232,255,.45), transparent 60%),
+      radial-gradient(900px 800px at 50% 100%, rgba(215,255,224,.45), transparent 60%),
+      #f7f8fb;
+    color:#111; line-height:1.55;
+  }
+  .wrap{ padding: clamp(16px, 4vw, 40px); display:flex; justify-content:center }
+  .container{ width:100%; max-width: var(--maxw); display:grid; gap: 16px }
+  header{ display:flex; align-items:baseline; gap: 12px; flex-wrap:wrap }
+  h1{ margin:0; font-size: clamp(22px, 3.6vw, 32px) }
+  .sub{ color: var(--muted); font-size: 13px }
+  .card{ background:#fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(16px, 2.8vw, 28px); }
+  label{ font-size: 14px; font-weight:600; display:block; margin-bottom: 6px }
+  input[type="text"], input[type="url"], input[readonly]{
+    width:100%; padding:12px 12px; border-radius: 12px; border:1px solid #ddd; font-size:16px;
+  }
+  input[readonly]{ background:#fafafa; color:#555 }
+  .row{ display:grid; grid-template-columns: 1fr auto; gap:10px; align-items:center; }
+  .btn{ padding:10px 14px; border-radius: 12px; border:1px solid #ddd; background:#fff; cursor:pointer; font-size:14px }
+  .btn.primary{ background:#111; color:#fff; border-color:#111 }
+  .btn.ghost{ background:#f7f7f7 }
+  .small{ font-size:12px; color:#777 }
+  .out{ background:#fff; border-radius: 12px; border:1px dashed #ddd; padding:12px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; word-break: break-all; }
+  .actions{ display:flex; flex-wrap:wrap; gap:10px }
+  .toggle{ display:flex; align-items:center; gap:12px; font-size:13px; color:#333; flex-wrap:wrap }
+  .divider{ height:1px; background:linear-gradient(90deg, rgba(0,0,0,.06), rgba(0,0,0,0)); margin: 12px 0 }
+  /* Suggestion list */
+  .suggest .head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px }
+  .suggest .list{ max-height: 300px; overflow:auto; border:1px solid #eee; border-radius:12px; padding:6px; background:#fafafa; }
+  .suggest .sec-title{ font-size:12px; color:#666; padding:6px 6px 0; }
+  .suggest button.item{
+    width:100%; text-align:left; padding:10px 12px; border-radius:10px; border:1px solid transparent; background:transparent; cursor:pointer; font-size:14px
+  }
+  .suggest button.item:hover{ background:#fff; border-color:#ddd }
+  .item .en{ font-weight:700 }
+  .item .ko{ font-size:12px; color:#666; margin-top:2px }
+  .suggest.disabled{ opacity:.5; pointer-events:none }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="container">
+      <header>
+        <h1>Link&nbsp;Maker PRO v2.2</h1>
+        <div class="sub">문장 → URL + 발음 자동 + 번역(추천·쌍언어) + 단축URL (QR 제거)</div>
+      </header>
+
+      <section class="card">
+        <div class="row">
+          <div>
+            <label for="base">Base URL</label>
+            <input type="url" id="base" value="https://inspire-wood.github.io/its-okay/">
+            <div class="small">보통 수정할 필요 없음</div>
+          </div>
+          <button class="btn" id="reset">기본값</button>
+        </div>
+
+        <div style="height:8px"></div>
+        <label for="ko">한국어</label>
+        <input type="text" id="ko" placeholder="예: 괜찮아 / 고마워 / 사랑해">
+
+        <div style="height:8px"></div>
+        <div class="row">
+          <div>
+            <label for="roman">한국어 발음 (영문)</label>
+            <input type="text" id="roman" placeholder="자동 생성됨 — 필요시 수정">
+            <div class="small">하이픈은 줄바꿈 방지하이픈(‑) 자동 적용</div>
+          </div>
+          <div class="toggle"><input type="checkbox" id="auto" checked><label for="auto">발음 자동</label></div>
+        </div>
+
+        <div style="height:8px"></div>
+        <div class="row">
+          <div>
+            <label for="en">영어 의미</label>
+            <input type="text" id="en" placeholder="추천에서 선택하거나 직접 입력">
+          </div>
+          <button class="btn" id="toupper">영문 대문자</button>
+        </div>
+
+        <div class="toggle" role="radiogroup" aria-label="영어 의미 모드">
+          <label><input type="radio" name="enMode" value="manual" checked> 직접입력</label>
+          <label><input type="radio" name="enMode" value="suggest"> 추천선택</label>
+          <span class="small">· 직접입력 모드에서 URL 생성 시, 입력값이 <b>내 저장 목록</b>에 추가됩니다.</span>
+        </div>
+
+        <div class="suggest" id="suggWrap">
+          <div class="head">
+            <div style="font-weight:700">영어 의미 추천 (영문 + 한국어)</div>
+            <div class="actions">
+              <button class="btn ghost" id="translate">번역(추천)</button>
+              <button class="btn ghost" id="clearSugg">지우기</button>
+            </div>
+          </div>
+          <div class="list" id="suggestList" aria-label="영어 의미 추천 목록"></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="actions">
+          <button class="btn primary" id="build">URL 생성</button>
+          <button class="btn" id="copy">URL 복사</button>
+          <a class="btn" id="open" target="_blank" rel="noopener">새 창에서 열기</a>
+        </div>
+
+        <div style="height:10px"></div>
+        <div class="out" id="out">여기에 결과 URL이 표시됩니다</div>
+
+        <div class="divider"></div>
+
+        <h3 style="margin:0 0 8px">단축 URL 만들기 (정적 리디렉트 파일)</h3>
+        <div class="small">GitHub Pages에 <code>go/슬러그.html</code> 파일을 올려 간단히 단축 링크를 만듭니다. (QR 기능 제거)</div>
+        <div style="height:8px"></div>
+        <div class="row">
+          <div>
+            <label for="slug">슬러그(slug)</label>
+            <input type="text" id="slug" placeholder="예: thanks / love / ok">
+            <div class="small">자동 제안: 발음 또는 영어 의미를 바탕으로 생성</div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="autoslug">자동 생성</button>
+            <a class="btn" id="downloadRedirect" download="slug.html">리디렉트 파일 다운로드</a>
+          </div>
+        </div>
+        <div class="small" id="shortInfo"></div>
+      </section>
+    </div>
+  </div>
+
+<script>
+  const $ = (s)=>document.querySelector(s);
+  const $$ = (s)=>document.querySelectorAll(s);
+  const nonbreak = '\u2011'; // NB hyphen
+
+  // Romanization maps
+  const CHO = ["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
+  const JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","wo","we","wi","yu","eu","ui","i"];
+  const JONG = ["","k","k","ks","n","nj","nh","t","l","lg","lm","lb","ls","lt","lp","lh","m","p","ps","t","t","ng","t","t","k","t","p","t"];
+
+  const PREFERRED = {
+    "괜찮아": "gwen‑cha‑na",
+    "고마워": "go‑ma‑wo",
+    "사랑해": "sa‑rang‑hae",
+    "미안해": "mi‑an‑hae",
+    "감사해": "gam‑sa‑hae",
+    "감사합니다": "gam‑sa‑ham‑ni‑da",
+    "축하해": "chuk‑ha‑hae",
+    "잘 했어": "jal‑haet‑seo",
+    "잘했어": "jal‑haet‑seo",
+    "힘내": "him‑nae",
+    "안녕": "an‑nyeong"
+  };
+
+  // Translation suggestions dictionary (offline)
+  const SUGG = [
+    { ko: "괜찮아", en: ["IT’S OKAY","I’M OKAY","NO WORRIES","ALL GOOD","THAT’S FINE"] },
+    { ko: "고마워", en: ["THANK YOU","THANKS","MUCH APPRECIATED"] },
+    { ko: "감사해", en: ["THANK YOU","MUCH APPRECIATED"] },
+    { ko: "감사합니다", en: ["THANK YOU","MUCH APPRECIATED"] },
+    { ko: "사랑해", en: ["I LOVE YOU","LOVE YOU"] },
+    { ko: "미안해", en: ["SORRY","I’M SORRY","MY APOLOGIES"] },
+    { ko: "축하해", en: ["CONGRATS","CONGRATULATIONS","WELL DONE"] },
+    { ko: "잘했어", en: ["WELL DONE","GOOD JOB","NICE WORK"] },
+    { ko: "힘내", en: ["CHEER UP","YOU’VE GOT THIS","HANG IN THERE"] },
+    { ko: "안녕", en: ["HELLO","HI","BYE"] }
+  ];
+  const POPULAR = ["IT’S OKAY","THANK YOU","I LOVE YOU","SORRY","CONGRATS","CHEER UP","WELL DONE"];
+
+  function isHangulSyllable(ch){
+    const code = ch.charCodeAt(0);
+    return code >= 0xAC00 && code <= 0xD7A3;
+  }
+  function romanizeKo(text){
+    const t = text.trim();
+    if (PREFERRED[t]) return PREFERRED[t];
+    const parts = [];
+    for (let i=0;i<t.length;i++){
+      const ch = t[i];
+      if (isHangulSyllable(ch)){
+        const code = ch.charCodeAt(0) - 0xAC00;
+        const ci = Math.floor(code / 588);
+        const vi = Math.floor((code % 588) / 28);
+        const fi = code % 28;
+        const r = CHO[ci] + JUNG[vi] + JONG[fi];
+        parts.push(r);
+      } else if (ch === ' '){
+        parts.push(' ');
+      } else {
+        parts.push(ch);
+      }
+    }
+    let out = "";
+    let buf = [];
+    for (const p of parts){
+      if (p === ' '){
+        if (buf.length){ out += buf.join(nonbreak); buf = []; }
+        out += ' ';
+      } else {
+        buf.push(p);
+      }
+    }
+    if (buf.length){ out += buf.join(nonbreak); }
+    return out.replace(/-/g, nonbreak);
+  }
+
+  // Custom EN store (local)
+  function loadCustom(){
+    try{ return JSON.parse(localStorage.getItem('customEN')||'[]'); }catch(e){ return []; }
+  }
+  function saveCustom(list){
+    localStorage.setItem('customEN', JSON.stringify(list));
+  }
+  function addCustom(en){
+    const v = (en||'').trim();
+    if (!v) return;
+    const list = loadCustom();
+    if (!list.includes(v)) { list.unshift(v); saveCustom(list); }
+  }
+
+  function buildUrl(){
+    // When in manual mode, save custom EN
+    const mode = document.querySelector('input[name="enMode"]:checked').value;
+    if (mode === 'manual'){
+      const manual = $('#en').value.trim();
+      if (manual) addCustom(manual);
+    }
+    // Build URL
+    const base = $('#base').value.trim() || 'https://inspire-wood.github.io/its-okay/';
+    const ko = $('#ko').value.trim();
+    const roman = $('#roman').value.trim();
+    const en = $('#en').value.trim();
+    const params = new URLSearchParams();
+    if (ko) params.set('ko', ko);
+    if (roman) params.set('roman', roman);
+    if (en) params.set('en', en);
+    const url = base.replace(/\/+$/, '/') + (params.toString() ? ('?' + params.toString()) : '');
+    $('#out').textContent = url;
+    $('#open').href = url;
+    localStorage.setItem('linkmakerPROv22', JSON.stringify({base, ko, roman, en, auto: $('#auto').checked, slug: $('#slug').value, mode}));
+    // Refresh suggestions to include new custom
+    refreshSuggest();
+    return url;
+  }
+
+  function renderSuggest(items, koLabel){
+    const listEl = $('#suggestList');
+    listEl.innerHTML = '';
+    const ko = koLabel || $('#ko').value.trim();
+    const custom = loadCustom();
+
+    // Custom section
+    if (custom.length){
+      const sec = document.createElement('div');
+      sec.className = 'sec-title';
+      sec.textContent = '내 저장 목록';
+      listEl.appendChild(sec);
+      custom.forEach(it=>{
+        const btn = document.createElement('button');
+        btn.className = 'item';
+        btn.innerHTML = '<div class="en">'+it+'</div><div class="ko">'+(ko||'한국어')+'</div>';
+        btn.addEventListener('click', ()=>{ $('#en').value = it; buildUrl(); });
+        listEl.appendChild(btn);
+      });
+    }
+
+    // Suggestions section
+    const sec2 = document.createElement('div');
+    sec2.className = 'sec-title';
+    sec2.textContent = '추천';
+    listEl.appendChild(sec2);
+
+    const uniq = [...new Set(items)];
+    uniq.forEach(it=>{
+      const btn = document.createElement('button');
+      btn.className = 'item';
+      btn.innerHTML = '<div class="en">'+it+'</div><div class="ko">'+(ko||'한국어')+'</div>';
+      btn.addEventListener('click', ()=>{ $('#en').value = it; buildUrl(); });
+      listEl.appendChild(btn);
+    });
+  }
+
+  function refreshSuggest(){
+    const ko = $('#ko').value.trim();
+    let items = [];
+    if (ko){
+      for (const row of SUGG){
+        if (row.ko === ko) items = items.concat(row.en);
+      }
+      if (items.length === 0){
+        for (const row of SUGG){
+          if (ko.includes(row.ko)) items = items.concat(row.en);
+        }
+      }
+    }
+    if (items.length === 0) items = POPULAR;
+    renderSuggest(items, ko);
+  }
+
+  function applyAutoRoman(){
+    if (!$('#auto').checked) return;
+    const ko = $('#ko').value.trim();
+    $('#roman').value = ko ? romanizeKo(ko) : '';
+  }
+
+  // Short URL tools (static redirect file)
+  function slugifyCandidate(){
+    const en = $('#en').value.trim().toLowerCase()
+      .replace(/&/g,' and ')
+      .replace(/[^a-z0-9]+/g,'-')
+      .replace(/^-+|-+$/g,'');
+    if (en) return en;
+    const roman = $('#roman').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+    if (roman) return roman;
+    const ko = $('#ko').value; // fallback
+    return ko ? 's-'+ko.charCodeAt(0).toString(36) : 'link';
+  }
+
+  function makeShort(){
+    const slug = ($('#slug').value.trim() || slugifyCandidate()).replace(/[^a-z0-9-]/g,'');
+    $('#slug').value = slug;
+    const longUrl = buildUrl();
+    const shortUrl = 'https://inspire-wood.github.io/its-okay/go/' + slug + '.html';
+    const html = '<!doctype html><meta charset="utf-8">'+
+                 '<meta http-equiv="refresh" content="0;url='+longUrl.replace(/"/g,'&quot;')+'">'+
+                 '<link rel="canonical" href="'+longUrl.replace(/"/g,'&quot;')+'">'+
+                 '<title>Redirecting...</title>'+
+                 '<p>Redirecting to <a href="'+longUrl.replace(/"/g,'&quot;')+'">target</a>...</p>';
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = $('#downloadRedirect');
+    a.href = url;
+    a.download = slug + '.html';
+    $('#shortInfo').innerHTML = '단축 링크: <code>https://inspire-wood.github.io/its-okay/go/'+slug+'.html</code> (파일 업로드 필요: <code>go/'+slug+'.html</code>)';
+  }
+
+  function applyMode(){
+    const mode = document.querySelector('input[name="enMode"]:checked').value;
+    if (mode === 'manual'){
+      $('#en').readOnly = false;
+      $('#suggWrap').classList.add('disabled');
+    } else {
+      $('#en').readOnly = true;
+      $('#suggWrap').classList.remove('disabled');
+    }
+  }
+
+  // Wire up
+  $('#build').addEventListener('click', buildUrl);
+  $('#copy').addEventListener('click', async ()=>{
+    const url = buildUrl();
+    try { await navigator.clipboard.writeText(url); alert('복사됨'); }
+    catch(e){ prompt('복사가 불가한 환경입니다. 수동 복사:', url); }
+  });
+  $('#open').addEventListener('click', buildUrl);
+  $('#toupper').addEventListener('click', ()=>{ $('#en').value = $('#en').value.toUpperCase(); buildUrl(); });
+
+  $('#reset').addEventListener('click', ()=>{ $('#base').value = 'https://inspire-wood.github.io/its-okay/'; buildUrl(); });
+  $('#auto').addEventListener('change', ()=>{ applyAutoRoman(); buildUrl(); });
+
+  $('#ko').addEventListener('input', ()=>{ applyAutoRoman(); buildUrl(); });
+  $('#roman').addEventListener('input', buildUrl);
+  $('#en').addEventListener('input', buildUrl);
+  $('#base').addEventListener('input', buildUrl);
+
+  $$('.toggle input[name="enMode"]').forEach(r=> r.addEventListener('change', ()=>{ applyMode(); buildUrl(); }));
+
+  $('#translate').addEventListener('click', ()=>{ refreshSuggest(); });
+  $('#clearSugg').addEventListener('click', ()=>{ $('#suggestList').innerHTML=''; });
+
+  $('#autoslug').addEventListener('click', ()=>{ $('#slug').value = slugifyCandidate(); });
+  $('#downloadRedirect').addEventListener('click', makeShort);
+
+  // load state
+  try{
+    const saved = JSON.parse(localStorage.getItem('linkmakerPROv22')||'{}');
+    if (saved.base) $('#base').value = saved.base;
+    if (saved.ko) $('#ko').value = saved.ko;
+    if (saved.roman) $('#roman').value = saved.roman;
+    if (saved.en) $('#en').value = saved.en;
+    if (typeof saved.auto === 'boolean') $('#auto').checked = saved.auto;
+    if (saved.slug) $('#slug').value = saved.slug;
+    if (saved.mode) {
+      const el = document.querySelector('input[name="enMode"][value="'+saved.mode+'"]');
+      if (el) el.checked = true;
+    }
+  }catch(e){}
+  applyAutoRoman();
+  applyMode();
+  refreshSuggest();
+  buildUrl();
+</script>
+</body>
+</html>
