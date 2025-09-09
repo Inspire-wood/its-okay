@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inspire Wood — Operations Dashboard (v1)</title>
+
+  <!-- Google Fonts (free commercial use) -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <!-- Day.js -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isoWeek.min.js" defer></script>
+  <!-- Papa Parse (CSV) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+
+  <style>
+    :root{
+      --bg: #0e0d0c;
+      --panel: #171512;
+      --muted: #a19a92;
+      --brand: #ffb86c;
+      --accent: #ffd1a6;
+      --ok: #29c46e;
+      --warn: #ff9a3c;
+      --danger: #ff5c5c;
+      --info: #6cb4ff;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --gradient-warm: radial-gradient(1200px 600px at 10% -20%, #ffe0b2 0%, transparent 60%),
+                       radial-gradient(900px 500px at 100% 10%, #ffd7d7 0%, transparent 60%),
+                       linear-gradient(135deg,#3b2a20 0%, #1d1612 55%, #120f0d 100%);
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      background:#0b0b0b;
+      color:#eee;
+      font-family: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+    }
+    .wrap{ max-width:1280px; margin:24px auto; padding:0 16px 120px; }
+    header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+    .title{ font-size:20px; font-weight:900; letter-spacing:.2px; display:flex; align-items:center; gap:10px; }
+    .badge{ font-size:12px; background:#322a22; padding:6px 10px; border-radius:999px; color:#ffd1a6; border:1px solid #4d3e32; }
+    .grid{ display:grid; grid-template-columns: 400px 1fr; gap:16px; }
+    @media (max-width: 1024px){ .grid{ grid-template-columns: 1fr; } }
+    .panel{ background: var(--panel); border:1px solid #2a241e; border-radius: var(--radius); box-shadow: var(--shadow); }
+    .controls{ padding:16px; }
+    .controls h3{ margin:10px 0 8px; font-size:14px; color:#ffcf99; letter-spacing:0.3px; }
+    .row{ display:flex; gap:8px; }
+    .row > *{ flex:1; }
+    label{ font-size:12px; color:#bba; display:block; margin-bottom:6px; }
+    input[type="text"], input[type="date"], input[type="number"], select {
+      width:100%; background:#12100e; border:1px solid #2a241e; color:#eee; border-radius:10px;
+      padding:10px 12px; outline:none;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:#2a241e; color:#ffd1a6; border:1px solid #3a3128; border-radius:12px; padding:10px 12px; cursor:pointer;
+      user-select:none; text-decoration:none;
+    }
+    .btn.primary{ background: linear-gradient(180deg, #ffb86c, #ff9a3c); color:#1f140a; border-color:#ffa652; }
+    .btn.ghost{ background: transparent; border-color:#3a3128; color:#d9c1aa; }
+    .btn.full{ width:100%; }
+    .btn.big{ padding:14px 16px; font-size:16px; font-weight:800; }
+    .btn-group{ display:flex; flex-wrap:wrap; gap:8px; }
+    .hint{ font-size:11px; color:#968b80; margin-top:6px; }
+    .sep{ height:1px; background:#2a241e; margin:12px 0; border:0; }
+    .pill{ display:inline-block; font-size:11px; padding:4px 8px; border:1px dashed rgba(255,255,255,0.25); border-radius:999px; color:#ffe0b2; }
+
+    /* Right side */
+    .right{ padding:16px; display:grid; grid-template-rows: auto auto 1fr; gap:16px; }
+    .hero{ background: var(--gradient-warm); border:1px solid #3b2e22; border-radius:24px; padding:16px; display:flex; align-items:center; justify-content:space-between; }
+    .kpis{ display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; }
+    @media (max-width: 900px){ .kpis{ grid-template-columns: repeat(2, 1fr); } }
+    .kpi{ background:#1c1814; border:1px solid #2f281f; border-radius:14px; padding:12px; }
+    .kpi .label{ font-size:12px; color:#d9c1aa; }
+    .kpi .value{ font-size:22px; font-weight:900; margin-top:6px; }
+    .kpi .delta{ font-size:11px; margin-top:4px; opacity:.85; }
+    .area{ display:grid; grid-template-columns: 1.2fr .8fr; gap:16px; }
+    @media (max-width: 1100px){ .area{ grid-template-columns: 1fr; } }
+    .card{ background:#171512; border:1px solid #2a241e; border-radius:16px; padding:14px; }
+    .card h4{ margin:4px 0 10px; font-size:14px; color:#ffcf99; }
+    canvas{ width:100%; height:280px; }
+
+    /* Table */
+    table{ width:100%; border-collapse: collapse; font-size:13px; }
+    th, td{ padding:10px; border-bottom:1px solid #2a241e; }
+    th{ text-align:left; color:#ffcf99; cursor:pointer; user-select:none; }
+    tr:hover td{ background:#151310; }
+    .table-wrap{ max-height: 420px; overflow:auto; border:1px solid #2a241e; border-radius:12px; }
+    .pager{ display:flex; gap:8px; align-items:center; justify-content:flex-end; margin-top:10px; }
+    .status{ font-weight:700; }
+    .s-New{ color:#ffd1a6; }
+    .s-Proof{ color:#6cb4ff; }
+    .s-Prod{ color:#ffb86c; }
+    .s-QA{ color:#ff9a3c; }
+    .s-Ship{ color:#29c46e; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">📊 Inspire Wood — Operations Dashboard <span class="badge">v1 · Link‑Maker 스타일</span></div>
+      <div class="btn-group">
+        <button class="btn ghost" id="btnHelp">도움말</button>
+        <button class="btn" id="btnReset">필터 초기화</button>
+        <button class="btn primary" id="btnSaveView">현재 뷰 저장</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: Controls -->
+      <section class="panel controls">
+        <h3>① 기간 / 검색</h3>
+        <div class="row">
+          <div>
+            <label for="dateFrom">시작일</label>
+            <input type="date" id="dateFrom">
+          </div>
+          <div>
+            <label for="dateTo">종료일</label>
+            <input type="date" id="dateTo">
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <label for="q">검색(주문번호/고객/메모)</label>
+          <input type="text" id="q" placeholder="예) IW-20250909-0001, Olivia, 배치 변경">
+        </div>
+
+        <h3>② 필터</h3>
+        <div class="row">
+          <div>
+            <label for="layout">레이아웃</label>
+            <select id="layout">
+              <option value="">전체</option>
+              <option>Layout A</option><option>Layout B</option><option>Layout C</option>
+            </select>
+          </div>
+          <div>
+            <label for="style">스타일</label>
+            <select id="style">
+              <option value="">전체</option>
+              <option>Engrave-Deep</option><option>Relief</option><option>Hybrid</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <label>상태</label>
+          <div class="btn-group" id="statusGroup">
+            <label class="btn"><input type="checkbox" value="New"  checked> New</label>
+            <label class="btn"><input type="checkbox" value="Proof" checked> Proof</label>
+            <label class="btn"><input type="checkbox" value="Prod" checked> Prod</label>
+            <label class="btn"><input type="checkbox" value="QA"   checked> QA</label>
+            <label class="btn"><input type="checkbox" value="Ship" checked> Ship</label>
+          </div>
+        </div>
+
+        <h3>③ 데이터</h3>
+        <div class="btn-group">
+          <label class="btn">
+            CSV 불러오기
+            <input type="file" id="file" accept=".csv" style="display:none">
+          </label>
+          <button class="btn" id="btnExport">CSV 내보내기</button>
+          <button class="btn" id="btnCopyJSON">JSON 복사</button>
+        </div>
+        <div class="hint" style="margin-top:6px">
+          CSV 헤더 예시: <span class="pill">OrderID</span> <span class="pill">Customer</span> <span class="pill">Layout</span> <span class="pill">Style</span> <span class="pill">Status</span> <span class="pill">CreatedAt</span> <span class="pill">DueDate</span> <span class="pill">Amount</span>
+        </div>
+
+        <h3>④ 적용</h3>
+        <div class="btn-group">
+          <button class="btn big primary" id="btnApply">적용/새로고침</button>
+          <button class="btn big" id="btnToday">오늘~7일</button>
+          <button class="btn big" id="btn30">최근 30일</button>
+        </div>
+        <hr class="sep">
+        <div class="hint">
+          입력값/필터는 자동 저장됩니다(브라우저 로컬). ZIP 업그레이더로는 본 HTML 1개만 올리면 됩니다.
+        </div>
+      </section>
+
+      <!-- RIGHT: Dashboard -->
+      <section class="right">
+        <div class="hero">
+          <div>
+            <div style="font-weight:900; font-size:18px;">실시간 운영지표</div>
+            <div style="font-size:12px; opacity:.85">필터 적용 범위 기준 지표</div>
+          </div>
+          <div><span class="pill">Made in Korea</span></div>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="label">총 주문(건)</div><div class="value" id="kpiOrders">0</div><div class="delta" id="kpiOrdersDelta">—</div></div>
+          <div class="kpi"><div class="label">진행 중(건)</div><div class="value" id="kpiInProgress">0</div><div class="delta">New+Proof+Prod</div></div>
+          <div class="kpi"><div class="label">QA 대기/진행(건)</div><div class="value" id="kpiQA">0</div><div class="delta">QA</div></div>
+          <div class="kpi"><div class="label">출고(건)</div><div class="value" id="kpiShip">0</div><div class="delta">Ship</div></div>
+          <div class="kpi"><div class="label">매출 합계(₩)</div><div class="value" id="kpiRevenue">0</div><div class="delta" id="kpiARPU">ARPU —</div></div>
+        </div>
+
+        <div class="area">
+          <div class="card">
+            <h4>일자별 주문 추이</h4>
+            <canvas id="chartLine"></canvas>
+          </div>
+          <div class="card">
+            <h4>상태 분포</h4>
+            <canvas id="chartPie"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>최근 주문</h4>
+          <div class="table-wrap">
+            <table id="tbl">
+              <thead>
+                <tr>
+                  <th data-key="OrderID">주문번호</th>
+                  <th data-key="CreatedAt">일자</th>
+                  <th data-key="Customer">고객</th>
+                  <th data-key="Layout">레이아웃</th>
+                  <th data-key="Style">스타일</th>
+                  <th data-key="Status">상태</th>
+                  <th data-key="Amount" style="text-align:right">금액</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <button class="btn" id="prev">&lt;</button>
+            <div id="pageInfo" style="font-size:12px; opacity:.85">1/1</div>
+            <button class="btn" id="next">&gt;</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // ----- Globals -----
+    const $ = (s) => document.querySelector(s);
+    const $$ = (s) => Array.from(document.querySelectorAll(s));
+    const STORAGE_KEY = "iwDashboardV1";
+    let DATA = [];         // full dataset
+    let VIEW = [];         // filtered & sorted
+    let PAGE = 1, PER = 10;
+    let SORT_KEY = "CreatedAt", SORT_DIR = "desc";
+
+    // Sample seed data
+    const SAMPLE = [
+      {OrderID:"IW-20250825-0001", Customer:"Olivia", Layout:"Layout A", Style:"Engrave-Deep", Status:"New",   CreatedAt:"2025-08-25", DueDate:"2025-09-02", Amount:48000},
+      {OrderID:"IW-20250826-0002", Customer:"Ethan",  Layout:"Layout B", Style:"Relief",       Status:"Proof", CreatedAt:"2025-08-26", DueDate:"2025-09-03", Amount:52000},
+      {OrderID:"IW-20250826-0003", Customer:"Mia",    Layout:"Layout A", Style:"Hybrid",       Status:"Prod",  CreatedAt:"2025-08-26", DueDate:"2025-09-04", Amount:61000},
+      {OrderID:"IW-20250827-0004", Customer:"Liam",   Layout:"Layout C", Style:"Engrave-Deep", Status:"Prod",  CreatedAt:"2025-08-27", DueDate:"2025-09-05", Amount:53000},
+      {OrderID:"IW-20250828-0005", Customer:"Emma",   Layout:"Layout B", Style:"Relief",       Status:"QA",    CreatedAt:"2025-08-28", DueDate:"2025-09-06", Amount:57000},
+      {OrderID:"IW-20250828-0006", Customer:"Noah",   Layout:"Layout A", Style:"Hybrid",       Status:"Ship",  CreatedAt:"2025-08-28", DueDate:"2025-09-01", Amount:65000},
+      {OrderID:"IW-20250829-0007", Customer:"Ava",    Layout:"Layout B", Style:"Engrave-Deep", Status:"New",   CreatedAt:"2025-08-29", DueDate:"2025-09-07", Amount:49000},
+      {OrderID:"IW-20250830-0008", Customer:"James",  Layout:"Layout C", Style:"Relief",       Status:"Proof", CreatedAt:"2025-08-30", DueDate:"2025-09-08", Amount:56000},
+      {OrderID:"IW-20250831-0009", Customer:"Sophia", Layout:"Layout A", Style:"Hybrid",       Status:"Prod",  CreatedAt:"2025-08-31", DueDate:"2025-09-09", Amount:59000},
+      {OrderID:"IW-20250901-0010", Customer:"Lucas",  Layout:"Layout B", Style:"Engrave-Deep", Status:"QA",    CreatedAt:"2025-09-01", DueDate:"2025-09-10", Amount:62000},
+      {OrderID:"IW-20250901-0011", Customer:"Mason",  Layout:"Layout A", Style:"Hybrid",       Status:"Ship",  CreatedAt:"2025-09-01", DueDate:"2025-09-05", Amount:70000},
+      {OrderID:"IW-20250902-0012", Customer:"Amelia", Layout:"Layout C", Style:"Relief",       Status:"New",   CreatedAt:"2025-09-02", DueDate:"2025-09-11", Amount:51000},
+      {OrderID:"IW-20250903-0013", Customer:"Henry",  Layout:"Layout B", Style:"Hybrid",       Status:"Proof", CreatedAt:"2025-09-03", DueDate:"2025-09-12", Amount:58000},
+      {OrderID:"IW-20250903-0014", Customer:"Mila",   Layout:"Layout A", Style:"Engrave-Deep", Status:"Prod",  CreatedAt:"2025-09-03", DueDate:"2025-09-13", Amount:54000},
+      {OrderID:"IW-20250904-0015", Customer:"Elijah", Layout:"Layout B", Style:"Relief",       Status:"QA",    CreatedAt:"2025-09-04", DueDate:"2025-09-14", Amount:60000},
+      {OrderID:"IW-20250905-0016", Customer:"Grace",  Layout:"Layout C", Style:"Hybrid",       Status:"Ship",  CreatedAt:"2025-09-05", DueDate:"2025-09-09", Amount:69000},
+      {OrderID:"IW-20250906-0017", Customer:"Harper", Layout:"Layout A", Style:"Engrave-Deep", Status:"New",   CreatedAt:"2025-09-06", DueDate:"2025-09-15", Amount:52000},
+      {OrderID:"IW-20250907-0018", Customer:"Jack",   Layout:"Layout B", Style:"Relief",       Status:"Proof", CreatedAt:"2025-09-07", DueDate:"2025-09-16", Amount:55000},
+      {OrderID:"IW-20250908-0019", Customer:"Chloe",  Layout:"Layout C", Style:"Hybrid",       Status:"QA",    CreatedAt:"2025-09-08", DueDate:"2025-09-17", Amount:64000},
+      {OrderID:"IW-20250909-0020", Customer:"Leo",    Layout:"Layout A", Style:"Engrave-Deep", Status:"Ship",  CreatedAt:"2025-09-09", DueDate:"2025-09-12", Amount:72000}
+    ];
+
+    // ---- Load/Save ----
+    function saveState(){
+      const filters = getFilters();
+      const payload = { filters, data: DATA };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    }
+    function loadState(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      try { return JSON.parse(raw); } catch(e){ return null; }
+    }
+
+    // ---- Filters ----
+    function getFilters(){
+      const f = {
+        from: $("#dateFrom").value || "",
+        to: $("#dateTo").value || "",
+        q: $("#q").value.trim(),
+        layout: $("#layout").value,
+        style: $("#style").value,
+        statuses: $$("#statusGroup input[type=checkbox]:checked").map(c=>c.value),
+      };
+      return f;
+    }
+    function setFilters(f){
+      $("#dateFrom").value = f.from || "";
+      $("#dateTo").value   = f.to   || "";
+      $("#q").value        = f.q    || "";
+      $("#layout").value   = f.layout || "";
+      $("#style").value    = f.style  || "";
+      $$("#statusGroup input[type=checkbox]").forEach(c=> c.checked = (f.statuses||[]).includes(c.value));
+    }
+
+    // ---- Apply filters ----
+    function apply(){
+      const f = getFilters();
+      VIEW = DATA.filter(r => {
+        if(f.q){
+          const blob = (r.OrderID+" "+r.Customer+" "+(r.Memo||"")).toLowerCase();
+          if(!blob.includes(f.q.toLowerCase())) return false;
+        }
+        if(f.layout && r.Layout !== f.layout) return false;
+        if(f.style  && r.Style  !== f.style ) return false;
+        if(f.statuses.length && !f.statuses.includes(r.Status)) return false;
+        if(f.from && dayjs(r.CreatedAt).isBefore(dayjs(f.from))) return false;
+        if(f.to   && dayjs(r.CreatedAt).isAfter(dayjs(f.to))) return false;
+        return true;
+      });
+
+      // sort
+      VIEW.sort((a,b)=>{
+        const A = a[SORT_KEY], B = b[SORT_KEY];
+        if(SORT_KEY === "Amount"){
+          return (SORT_DIR==="asc" ? A-B : B-A);
+        }else if(SORT_KEY === "CreatedAt"){
+          return (SORT_DIR==="asc" ? new Date(A)-new Date(B) : new Date(B)-new Date(A));
+        }else{
+          return (SORT_DIR==="asc" ? (A+"").localeCompare(B+"") : (B+"").localeCompare(A+""));
+        }
+      });
+
+      PAGE = 1;
+      render();
+      saveState();
+    }
+
+    // ---- Render ----
+    let chartLine, chartPie;
+    function render(){
+      // KPIs
+      $("#kpiOrders").textContent = VIEW.length.toLocaleString();
+      const inprog = VIEW.filter(r=>["New","Proof","Prod"].includes(r.Status)).length;
+      $("#kpiInProgress").textContent = inprog.toLocaleString();
+      $("#kpiQA").textContent = VIEW.filter(r=>r.Status==="QA").length.toLocaleString();
+      $("#kpiShip").textContent = VIEW.filter(r=>r.Status==="Ship").length.toLocaleString();
+      const revenue = VIEW.reduce((s,r)=>s+(+r.Amount||0),0);
+      $("#kpiRevenue").textContent = revenue.toLocaleString();
+
+      const arpu = (VIEW.length? Math.round(revenue/VIEW.length): 0).toLocaleString();
+      $("#kpiARPU").textContent = "ARPU ₩" + arpu;
+
+      // Line chart (orders by day)
+      const byDay = {};
+      for(const r of VIEW){
+        const d = r.CreatedAt;
+        byDay[d] = (byDay[d]||0)+1;
+      }
+      const days = Object.keys(byDay).sort();
+      const cnts = days.map(d=>byDay[d]);
+
+      const lc = $("#chartLine").getContext("2d");
+      if(chartLine) chartLine.destroy();
+      chartLine = new Chart(lc, {
+        type: "line",
+        data: { labels: days, datasets: [{ label:"주문 수", data: cnts, tension: .25 }]},
+        options: {
+          responsive:true,
+          scales:{ x:{ ticks:{ color:"#e8d9c6" }}, y:{ ticks:{ color:"#e8d9c6" }}},
+          plugins:{ legend:{ labels:{ color:"#e8d9c6" }}},
+        }
+      });
+
+      // Pie chart (status distribution)
+      const statuses = ["New","Proof","Prod","QA","Ship"];
+      const counts = statuses.map(s=> VIEW.filter(r=>r.Status===s).length);
+      const pc = $("#chartPie").getContext("2d");
+      if(chartPie) chartPie.destroy();
+      chartPie = new Chart(pc, {
+        type: "doughnut",
+        data: { labels: statuses, datasets: [{ data: counts }]},
+        options: { plugins:{ legend:{ labels:{ color:"#e8d9c6" }}} }
+      });
+
+      // Table (paged)
+      const tbody = $("#tbl tbody");
+      tbody.innerHTML = "";
+      const start = (PAGE-1)*PER, end = start+PER;
+      for(const r of VIEW.slice(start,end)){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.OrderID}</td>
+          <td>${r.CreatedAt}</td>
+          <td>${r.Customer}</td>
+          <td>${r.Layout}</td>
+          <td>${r.Style}</td>
+          <td class="status s-${r.Status}">${r.Status}</td>
+          <td style="text-align:right">${(+r.Amount||0).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+      const totalPages = Math.max(1, Math.ceil(VIEW.length/PER));
+      $("#pageInfo").textContent = PAGE + " / " + totalPages;
+    }
+
+    // ---- Sorting ----
+    $$("#tbl thead th").forEach(th=>{
+      th.addEventListener("click", ()=>{
+        const key = th.dataset.key;
+        if(!key) return;
+        if(SORT_KEY===key){ SORT_DIR = (SORT_DIR==="asc"?"desc":"asc"); } else { SORT_KEY=key; SORT_DIR="asc"; }
+        apply();
+      });
+    });
+
+    // ---- Paging ----
+    $("#prev").addEventListener("click", ()=>{ PAGE = Math.max(1, PAGE-1); render(); });
+    $("#next").addEventListener("click", ()=>{
+      const totalPages = Math.max(1, Math.ceil(VIEW.length/PER));
+      PAGE = Math.min(totalPages, PAGE+1);
+      render();
+    });
+
+    // ---- Data import/export ----
+    $("#file").addEventListener("change", (e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      Papa.parse(f, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (res)=>{
+          const rows = res.data.map(x=>({
+            OrderID: (x.OrderID||"").trim(),
+            Customer:(x.Customer||"").trim(),
+            Layout:  (x.Layout||"").trim(),
+            Style:   (x.Style||"").trim(),
+            Status:  (x.Status||"").trim(),
+            CreatedAt:(x.CreatedAt||"").slice(0,10),
+            DueDate: (x.DueDate||"").slice(0,10),
+            Amount:  Number(x.Amount||0)
+          })).filter(x=>x.OrderID);
+          if(!rows.length){ alert("유효한 행이 없습니다."); return; }
+          DATA = rows;
+          apply();
+          alert("CSV 불러오기 완료: " + rows.length + "건");
+        }
+      });
+    });
+
+    $("#btnExport").addEventListener("click", ()=>{
+      const header = ["OrderID","Customer","Layout","Style","Status","CreatedAt","DueDate","Amount"];
+      const rows = [header.join(",")].concat(DATA.map(r=> header.map(h=>r[h]).join(",")));
+      const blob = new Blob([rows.join("\n")], {type:"text/csv;charset=utf-8;"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "iw_dashboard_export.csv";
+      a.click();
+    });
+
+    $("#btnCopyJSON").addEventListener("click", ()=>{
+      navigator.clipboard.writeText(JSON.stringify(DATA, null, 2)).then(()=>{
+        alert("JSON 복사 완료");
+      }).catch(()=> alert("클립보드 권한 오류"));
+    });
+
+    // ---- Buttons ----
+    $("#btnApply").addEventListener("click", apply);
+    $("#btnToday").addEventListener("click", ()=>{
+      const to = dayjs().format("YYYY-MM-DD");
+      const from = dayjs().subtract(7,"day").format("YYYY-MM-DD");
+      $("#dateFrom").value = from; $("#dateTo").value = to; apply();
+    });
+    $("#btn30").addEventListener("click", ()=>{
+      const to = dayjs().format("YYYY-MM-DD");
+      const from = dayjs().subtract(30,"day").format("YYYY-MM-DD");
+      $("#dateFrom").value = from; $("#dateTo").value = to; apply();
+    });
+    $("#btnReset").addEventListener("click", ()=>{
+      setFilters({from:"",to:"",q:"",layout:"",style:"",statuses:["New","Proof","Prod","QA","Ship"]});
+      apply();
+    });
+    $("#btnHelp").addEventListener("click", ()=>{
+      alert([
+        "• 좌측에서 기간/검색/필터를 설정하고 ‘적용/새로고침’을 누르세요.",
+        "• CSV는 헤더를 포함한 UTF-8 인코딩을 권장합니다.",
+        "• 표 헤더를 클릭하면 정렬 순서를 변경할 수 있어요.",
+        "• 상태는 New, Proof, Prod, QA, Ship 다섯 단계로 요약 표기합니다.",
+        "• 데이터/필터는 로컬에 자동 저장됩니다."
+      ].join("\n"));
+    });
+    $("#btnSaveView").addEventListener("click", ()=>{
+      const views = JSON.parse(localStorage.getItem(STORAGE_KEY+":views")||"[]");
+      views.unshift({at: Date.now(), filters:getFilters()});
+      localStorage.setItem(STORAGE_KEY+":views", JSON.stringify(views.slice(0,20)));
+      alert("현재 뷰를 저장했어요.");
+    });
+
+    // ---- Init ----
+    window.addEventListener("DOMContentLoaded", ()=>{
+      if(window.dayjs && dayjs.extend) dayjs.extend(window.dayjs_plugin_isoWeek);
+      const cached = loadState();
+      if(cached && cached.data && cached.data.length){
+        DATA = cached.data;
+        setFilters(cached.filters || {from:"",to:"",q:"",layout:"",style:"",statuses:["New","Proof","Prod","QA","Ship"]});
+      }else{
+        DATA = SAMPLE;
+        // default range: last 14 days
+        $("#dateFrom").value = dayjs().subtract(14,"day").format("YYYY-MM-DD");
+        $("#dateTo").value   = dayjs().format("YYYY-MM-DD");
+      }
+      apply();
+    });
+  </script>
+</body>
+</html>
