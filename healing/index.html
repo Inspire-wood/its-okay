@@ -3,15 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>힐링메세지 메이커 — Inspire Wood</title>
+<title>힐링메세지 메이커 v1.1 — Inspire Wood</title>
 <meta name="theme-color" content="#111111">
 <style>
-  :root{
-    --maxw: 900px; --radius: 16px; --shadow: 0 12px 36px rgba(0,0,0,.08);
-    --muted:#666;
-  }
+  :root{ --maxw: 980px; --radius: 16px; --shadow: 0 12px 36px rgba(0,0,0,.08); --muted:#666; }
   *{ box-sizing: border-box }
-  html,body{ margin:0; padding:0; }
+  html,body{ margin:0; padding:0 }
   body{
     font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial, sans-serif;
     background:
@@ -25,12 +22,10 @@
   header{ display:flex; align-items:baseline; gap: 12px; flex-wrap:wrap }
   h1{ margin:0; font-size: clamp(22px, 3.6vw, 32px) }
   .sub{ color: var(--muted); font-size: 13px }
-
   .topbar{ display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap }
   .chip{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
          border:1px solid #e5e7eb; background:#fff; text-decoration:none; color:#111; font-weight:600; font-size:13px; }
   .chip:hover{ border-color:#d1d5db }
-
   .grid{ display:grid; gap:16px }
   .card{ background:#fff; border-radius: var(--radius); box-shadow: var(--shadow); padding: clamp(16px, 2.8vw, 28px); }
   label{ font-size: 14px; font-weight:600; display:block; margin-bottom: 6px }
@@ -51,7 +46,8 @@
   .item{ display:grid; grid-template-columns: auto 1fr auto; gap:8px; align-items:center; }
   .item input[type="text"]{ padding:10px 10px; font-size:14px }
   .muted{ color:#6b7280; font-size:12px }
-  .danger{ color:#b91c1c }
+  .hl{ background:#fff6d5; padding:2px 6px; border-radius:6px }
+  .kbd{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:6px; padding:2px 6px }
 </style>
 </head>
 <body>
@@ -60,6 +56,7 @@
 
       <div class="topbar">
         <div style="display:flex; gap:8px; flex-wrap:wrap">
+          <a class="chip" href="./card/" target="_blank">미리보기: 카드</a>
           <a class="chip" href="../">← Healing (Landing)</a>
           <a class="chip" href="../tools/">Tools Dashboard</a>
         </div>
@@ -71,8 +68,8 @@
       </div>
 
       <header>
-        <h1>힐링메세지 메이커</h1>
-        <div class="sub">주문자 이름 · 카테고리 · 문장 목록을 관리하고 URL/단축TXT를 만듭니다.</div>
+        <h1>힐링메세지 메이커 <span class="hl">v1.1</span></h1>
+        <div class="sub">주문자 이름 · 카테고리 · 문장 목록을 관리하고 <b>카드 URL / 단축TXT</b>를 만듭니다. 카드 페이지는 <span class="kbd">/healing/card/</span> 입니다.</div>
       </header>
 
       <section class="card grid">
@@ -82,9 +79,9 @@
             <input type="text" id="name" placeholder="예: 김민지 / Olivia / Team IW">
           </div>
           <div>
-            <label for="base">Base URL (Healing 랜딩)</label>
+            <label for="cardBase">Card Base URL</label>
             <div class="row">
-              <input type="url" id="base" value="https://inspire-wood.github.io/its-okay/healing/">
+              <input type="url" id="cardBase" value="https://inspire-wood.github.io/its-okay/healing/card/">
               <button class="btn" id="detectBase">현재 경로</button>
             </div>
             <div class="small">보통 수정할 필요 없음</div>
@@ -101,11 +98,12 @@
             <div class="small">기본: 힐링메세지 · 성경구절 · 기타</div>
           </div>
           <div>
-            <label for="newCat" id="newCatLabel" style="display:none">새 항목 이름</label>
-            <div class="row" id="newCatRow" style="display:none">
-              <input type="text" id="newCat" placeholder="예: 감사문장 / 축복문장">
-              <button class="btn primary" id="saveCat">저장</button>
+            <label>표시 방식</label>
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap">
+              <label><input type="radio" name="mode" value="daily" checked> 매일 랜덤</label>
+              <label><input type="radio" name="mode" value="fixed"> 선택 고정</label>
             </div>
+            <div class="small">고정인 경우, 아래 목록에서 선택된 문장이 카드에 표시됩니다.</div>
           </div>
         </div>
 
@@ -115,18 +113,39 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap">
               <button class="btn" id="addMsg">문장 추가</button>
               <button class="btn ghost" id="saveList">저장</button>
-              <span class="small">라디오 선택된 문장이 URL 생성에 사용됩니다.</span>
+              <span class="small">라디오 선택된 문장이 <b>고정</b> 모드에서 사용됩니다.</span>
             </div>
           </div>
           <div class="list" id="msgList" aria-label="메세지 목록"></div>
-          <p class="muted">예시 — 힐링메세지: 오늘의 햇살처럼 마음도 밝아지길 · 성경구절: 주는 그리스도 시요 살아계신 하나님의 아들이시니이다. (마16:16)</p>
         </div>
 
         <div class="divider"></div>
 
         <div class="grid">
           <div>
-            <h3 style="margin:0 0 8px">URL 생성 / 복사 / 새창</h3>
+            <h3 style="margin:0 0 8px">데이타(JSON) 만들기</h3>
+            <div class="rows">
+              <div>
+                <label for="slug">슬러그(slug)</label>
+                <div class="row">
+                  <input type="text" id="slug" placeholder="예: mj-healing / grace-001">
+                  <button class="btn" id="autoslug">자동 생성</button>
+                </div>
+                <div class="small">업로드 경로 예시: <code>/its-okay/data/<b>[slug]</b>.json</code></div>
+              </div>
+              <div>
+                <label>다운로드</label>
+                <div style="display:flex; gap:8px; flex-wrap:wrap">
+                  <a class="btn" id="downloadData" download="data.json">데이타 JSON</a>
+                  <a class="btn ghost" id="downloadRedirect" download="slug.html">리디렉트 HTML(옵션)</a>
+                </div>
+                <div class="small">JSON을 <code>data/[slug].json</code>으로 업로드 → 카드에서 불러옵니다.</div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h3 style="margin:0 0 8px">카드 URL 생성 / 복사 / 새창</h3>
             <div class="rows">
               <div>
                 <label for="preview">선택된 문장 미리보기</label>
@@ -141,28 +160,7 @@
                 </div>
                 <div style="height:10px"></div>
                 <div class="out" id="out">여기에 결과 URL이 표시됩니다</div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 style="margin:0 0 8px">단축 URL · TXT 다운로드</h3>
-            <div class="rows">
-              <div>
-                <label for="slug">슬러그(slug)</label>
-                <div class="row">
-                  <input type="text" id="slug" placeholder="예: mj-healing / grace-001">
-                  <button class="btn" id="autoslug">자동 생성</button>
-                </div>
-                <div class="small" id="shortInfo">단축 형태는 <code>https://inspire-wood.github.io/its-okay/go/[slug].html</code> 입니다.</div>
-              </div>
-              <div>
-                <label>다운로드</label>
-                <div style="display:flex; gap:8px; flex-wrap:wrap">
-                  <a class="btn" id="downloadTxt" download="order.txt">[주문자이름].txt</a>
-                  <a class="btn ghost" id="downloadRedirect" download="slug.html">리디렉트 파일(옵션)</a>
-                </div>
-                <div class="small">요청사항: 단축 URL을 텍스트 파일로 저장합니다. (리디렉트 HTML은 선택)</div>
+                <div class="small">형식: <code>[cardBase]?name=...&mode=daily|fixed&cat=...&sel=0&data=https://.../data/[slug].json</code></div>
               </div>
             </div>
           </div>
@@ -170,218 +168,194 @@
 
       </section>
 
-      <p class="muted">© Inspire Wood — Healing Message Maker v1</p>
+      <p class="muted">© Inspire Wood — Healing Message Maker v1.1</p>
     </div>
   </div>
 
 <script>
   const $ = (s)=>document.querySelector(s);
   const $$ = (s)=>document.querySelectorAll(s);
-  const key = 'healingMakerV1';
+  const key = 'healingMakerV11';
 
-  // ----- State helpers -----
-  function load(){
-    try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){ return {}; }
-  }
+  function load(){ try{ return JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){ return {}; } }
   function save(st){ localStorage.setItem(key, JSON.stringify(st)); }
 
   function defaultState(){
     return {
-      name: '', base: 'https://inspire-wood.github.io/its-okay/healing/',
-      cats: ['힐링메세지','성경구절','기타'],
-      msgs: {
-        '힐링메세지': ['오늘의 햇살처럼 마음도 밝아지길'],
-        '성경구절': ['주는 그리스도 시요 살아계신 하나님의 아들이시니이다. 마16:16'],
-        '기타': []
+      name:'',
+      cardBase:'https://inspire-wood.github.io/its-okay/healing/card/',
+      cats:['힐링메세지','성경구절','기타'],
+      msgs:{
+        '힐링메세지':['오늘의 햇살처럼 마음도 밝아지길'],
+        '성경구절':['주는 그리스도 시요 살아계신 하나님의 아들이시니이다. 마16:16'],
+        '기타':[]
       },
-      currentCat: '힐링메세지',
-      selected: { '힐링메세지': 0 },
-      slug: ''
+      currentCat:'힐링메세지',
+      selected:{'힐링메세지':0},
+      mode:'daily',
+      slug:''
     };
   }
 
   let st = Object.assign(defaultState(), load());
   init();
 
-  // ----- UI init -----
   function init(){
-    // inputs
-    $('#name').value = st.name || '';
-    $('#base').value = st.base || defaultState().base;
-    $('#slug').value = st.slug || '';
+    $('#name').value = st.name||'';
+    $('#cardBase').value = st.cardBase||defaultState().cardBase;
+    $('#slug').value = st.slug||'';
 
-    // cats
-    renderCats();
-    $('#cat').value = st.currentCat;
-    renderList();
+    renderCats(); $('#cat').value = st.currentCat; renderList();
+    $$('input[name="mode"]').forEach(r=>{ r.checked = (r.value===st.mode); r.addEventListener('change',()=>{ st.mode=r.value; save(st); buildUrl(); }); });
 
-    // wire up
-    $('#name').addEventListener('input', ()=>{ st.name = $('#name').value; save(st); syncDownloads(); });
-    $('#base').addEventListener('input', ()=>{ st.base = $('#base').value; save(st); });
-    $('#cat').addEventListener('change', ()=>{ st.currentCat = $('#cat').value; save(st); renderList(); });
+    $('#name').addEventListener('input', ()=>{ st.name=$('#name').value; save(st); syncDownloads(); });
+    $('#cardBase').addEventListener('input', ()=>{ st.cardBase=$('#cardBase').value; save(st); buildUrl(); });
+    $('#cat').addEventListener('change', ()=>{ st.currentCat=$('#cat').value; save(st); renderList(); buildUrl(); });
     $('#addCat').addEventListener('click', showAddCat);
-    $('#saveCat').addEventListener('click', addCategory);
-
     $('#addMsg').addEventListener('click', ()=> addMsg(''));
-    $('#saveList').addEventListener('click', saveList);
+    $('#saveList').addEventListener('click', ()=>{ save(st); alert('저장됨'); });
+
+    $('#autoslug').addEventListener('click', ()=>{ $('#slug').value = slugifyCandidate(); st.slug=$('#slug').value; save(st); syncDownloads(); buildUrl(); });
+    $('#slug').addEventListener('input', ()=>{ st.slug=$('#slug').value; save(st); syncDownloads(); buildUrl(); });
+
+    $('#exportData').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(st,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='healing-maker-export.json'; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    });
+    $('#importData').addEventListener('change', async (ev)=>{
+      const f = ev.target.files[0]; if(!f) return;
+      try{ const obj = JSON.parse(await f.text()); st = Object.assign(defaultState(), obj); save(st); init(); alert('가져오기 완료'); }
+      catch(e){ alert('JSON 파싱 실패: '+e.message); }
+    });
+    $('#resetAll').addEventListener('click', ()=>{ if(!confirm('모든 값을 초기화할까요?')) return; localStorage.removeItem(key); st=defaultState(); init(); });
 
     $('#build').addEventListener('click', buildUrl);
-    $('#copy').addEventListener('click', async ()=>{
-      const url = buildUrl();
-      try{ await navigator.clipboard.writeText(url); alert('복사됨'); }catch(e){ prompt('복사 실패 — 수동으로 복사하세요', url); }
-    });
+    $('#copy').addEventListener('click', async ()=>{ const url = buildUrl(); try{ await navigator.clipboard.writeText(url); alert('복사됨'); }catch(e){ prompt('복사 실패 — 수동 복사', url); } });
     $('#open').addEventListener('click', buildUrl);
 
-    $('#autoslug').addEventListener('click', ()=>{ $('#slug').value = slugifyCandidate(); st.slug = $('#slug').value; save(st); syncDownloads(); });
-    $('#slug').addEventListener('input', ()=>{ st.slug = $('#slug').value; save(st); syncDownloads(); });
+    $('#downloadData').addEventListener('click', ()=>{
+      const data = { name: st.name, cats: st.cats, msgs: st.msgs };
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const a = $('#downloadData'); const slug = ($('#slug').value||'data').trim()||'data';
+      a.href = URL.createObjectURL(blob);
+      a.download = slug + '.json';
+      setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    });
+
+    $('#downloadRedirect').addEventListener('click', ()=>{
+      const url = buildUrl();
+      const html = '<!doctype html><meta charset="utf-8">'+
+                   '<meta http-equiv="refresh" content="0;url='+url.replace(/\"/g,'&quot;')+'">'+
+                   '<link rel="canonical" href="'+url.replace(/\"/g,'&quot;')+'">'+
+                   '<title>Redirecting...</title>'+
+                   '<p>Redirecting to <a href="'+url.replace(/\"/g,'&quot;')+'">target</a>...</p>';
+      const blob = new Blob([html], {type:'text/html'});
+      const a2 = $('#downloadRedirect'); const slug = ($('#slug').value||'go').trim()||'go';
+      a2.href = URL.createObjectURL(blob); a2.download = slug + '.html';
+      setTimeout(()=>URL.revokeObjectURL(a2.href), 1000);
+    });
 
     $('#detectBase').addEventListener('click', ()=>{
       try{
         const {origin, pathname} = location;
         const ix = pathname.indexOf('/its-okay/');
-        const base = ix>=0 ? (origin + pathname.slice(0, ix+10) + 'healing/') : 'https://inspire-wood.github.io/its-okay/healing/';
-        $('#base').value = base; st.base = base; save(st);
+        const base = ix>=0 ? (origin + pathname.slice(0, ix+10) + 'healing/card/') : 'https://inspire-wood.github.io/its-okay/healing/card/';
+        $('#cardBase').value = base; st.cardBase = base; save(st);
       }catch(e){}
     });
 
-    $('#exportData').addEventListener('click', ()=>{
-      const blob = new Blob([JSON.stringify(st,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='healing-maker-data.json'; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url), 1000);
-    });
-    $('#importData').addEventListener('change', async (ev)=>{
-      const f = ev.target.files[0]; if(!f) return;
-      try{
-        const txt = await f.text();
-        const obj = JSON.parse(txt);
-        st = Object.assign(defaultState(), obj); save(st);
-        init(); alert('가져오기 완료');
-      }catch(e){ alert('JSON 파싱 실패: '+e.message); }
-    });
-    $('#resetAll').addEventListener('click', ()=>{
-      if(!confirm('모든 값을 초기화할까요?')) return;
-      localStorage.removeItem(key); st = defaultState(); init();
-    });
-
-    // initial
     syncDownloads();
     buildUrl();
   }
 
-  // ----- Category -----
   function renderCats(){
     const el = $('#cat'); el.innerHTML = '';
-    st.cats.forEach(c=>{
-      const o = document.createElement('option'); o.value = c; o.textContent = c; el.appendChild(o);
-    });
+    st.cats.forEach(c=>{ const o=document.createElement('option'); o.value=c; o.textContent=c; el.appendChild(o); });
   }
   function showAddCat(){
-    $('#newCatLabel').style.display='block';
-    $('#newCatRow').style.display='grid';
-    $('#newCat').focus();
-  }
-  function addCategory(){
-    const name = ($('#newCat').value||'').trim();
-    if(!name) return alert('이름을 입력하세요');
+    const name = prompt('새 항목 이름');
+    if(!name) return;
     if(st.cats.includes(name)) return alert('이미 존재합니다');
-    st.cats.push(name); st.msgs[name] = []; st.selected[name] = 0; st.currentCat = name; save(st);
-    $('#newCat').value = ''; $('#newCatLabel').style.display='none'; $('#newCatRow').style.display='none';
-    renderCats(); $('#cat').value = name; renderList();
+    st.cats.push(name); st.msgs[name]=[]; st.selected[name]=0; st.currentCat=name; save(st);
+    renderCats(); $('#cat').value=name; renderList();
   }
-
-  // ----- Messages -----
   function renderList(){
-    const wrap = $('#msgList'); wrap.innerHTML = '';
-    const cat = st.currentCat;
-    const list = st.msgs[cat] || [];
+    const wrap = $('#msgList'); wrap.innerHTML='';
+    const cat = st.currentCat, list = st.msgs[cat]||[];
     list.forEach((txt, idx)=>{
-      const row = document.createElement('div'); row.className='item';
+      const row=document.createElement('div'); row.className='item';
       row.innerHTML = `
         <input type="radio" name="pick" ${(st.selected[cat]||0)===idx?'checked':''} aria-label="선택">
         <input type="text" value="${escapeHtml(txt)}" aria-label="문장">
-        <button class="btn" title="삭제">삭제</button>
-      `;
-      const r = row.querySelector('input[type="radio"]');
-      const t = row.querySelector('input[type="text"]');
-      const d = row.querySelector('button');
-      r.addEventListener('change', ()=>{ st.selected[cat] = idx; save(st); updatePreview(); });
-      t.addEventListener('input', ()=>{ list[idx] = t.value; save(st); updatePreview(); });
-      d.addEventListener('click', ()=>{
-        if(confirm('삭제할까요?')){ list.splice(idx,1); if((st.selected[cat]||0)>=list.length) st.selected[cat]=0; save(st); renderList(); }
-      });
+        <button class="btn" title="삭제">삭제</button>`;
+      const r=row.querySelector('input[type="radio"]');
+      const t=row.querySelector('input[type="text"]');
+      const d=row.querySelector('button');
+      r.addEventListener('change', ()=>{ st.selected[cat]=idx; save(st); updatePreview(); buildUrl(); });
+      t.addEventListener('input', ()=>{ list[idx]=t.value; save(st); updatePreview(); });
+      d.addEventListener('click', ()=>{ if(confirm('삭제할까요?')){ list.splice(idx,1); if((st.selected[cat]||0)>=list.length) st.selected[cat]=0; save(st); renderList(); } });
       wrap.appendChild(row);
     });
     updatePreview();
   }
-  function addMsg(txt){
-    const cat = st.currentCat;
-    st.msgs[cat] = st.msgs[cat]||[]; st.msgs[cat].push(txt||''); st.selected[cat] = st.msgs[cat].length-1;
-    save(st); renderList();
-  }
-  function saveList(){ save(st); alert('저장됨'); }
-
-  function currentMessage(){
-    const cat = st.currentCat;
-    const list = st.msgs[cat]||[];
-    const ix = Math.max(0, Math.min(st.selected[cat]||0, list.length-1));
-    return list[ix]||'';
-  }
+  function addMsg(txt){ const cat=st.currentCat; st.msgs[cat]=st.msgs[cat]||[]; st.msgs[cat].push(txt||''); st.selected[cat]=st.msgs[cat].length-1; save(st); renderList(); }
+  function currentMessage(){ const cat=st.currentCat, list=st.msgs[cat]||[]; const ix=Math.max(0,Math.min(st.selected[cat]||0,(list.length-1))); return list[ix]||''; }
   function updatePreview(){ $('#preview').value = currentMessage(); }
 
-  // ----- URL Build -----
-  function buildUrl(){
-    const base = ($('#base').value||'').trim() || 'https://inspire-wood.github.io/its-okay/healing/';
-    const name = ($('#name').value||'').trim();
-    const cat = st.currentCat;
-    const msg = currentMessage();
-
-    const params = new URLSearchParams();
-    if(name) params.set('name', name);
-    if(cat) params.set('cat', cat);
-    if(msg) params.set('msg', msg);
-    const url = base.replace(/\/+$/,'/') + (params.toString()?('?'+params.toString()):'');
-    $('#out').textContent = url;
-    $('#open').href = url;
-    syncDownloads();
-    return url;
-  }
-
-  // ----- Short & Downloads -----
   function slugifyCandidate(){
     const name = ($('#name').value||'').trim().toLowerCase();
     let s = name.replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-    if(!s){
-      const n = name||st.currentCat||'h';
-      s = 'h-'+ (n.charCodeAt(0)||104).toString(36);
-    }
+    if(!s){ const n = name||st.currentCat||'h'; s = 'h-'+ (n.charCodeAt(0)||104).toString(36); }
     return s;
   }
   function syncDownloads(){
     const slug = ($('#slug').value||'').trim() || slugifyCandidate();
-    const longUrl = buildUrl();
-    const shortUrl = 'https://inspire-wood.github.io/its-okay/go/' + slug + '.html';
-    $('#shortInfo').innerHTML = '단축 링크: <code>'+shortUrl+'</code> (파일 업로드 필요: <code>go/'+slug+'.html</code>)';
-
-    // TXT
-    const name = ($('#name').value||'주문자').trim();
-    const txt = 'Healing Link\\n\\nLong: '+longUrl+'\\nShort: '+shortUrl+'\\n\\nName: '+name+'\\nCategory: '+(st.currentCat||'')+'\\n';
-    const blob = new Blob([txt], {type:'text/plain;charset=utf-8'});
-    const urlTxt = URL.createObjectURL(blob);
-    const aTxt = $('#downloadTxt'); aTxt.href = urlTxt; aTxt.download = (name||'order') + '.txt';
-
-    // Redirect HTML (optional)
-    const html = '<!doctype html><meta charset="utf-8">'+
-                 '<meta http-equiv="refresh" content="0;url='+longUrl.replace(/\"/g,'&quot;')+'">'+
-                 '<link rel="canonical" href="'+longUrl.replace(/\"/g,'&quot;')+'">'+
-                 '<title>Redirecting...</title>'+
-                 '<p>Redirecting to <a href="'+longUrl.replace(/\"/g,'&quot;')+'">target</a>...</p>';
-    const blob2 = new Blob([html], {type:'text/html'});
-    const url2 = URL.createObjectURL(blob2);
-    const a2 = $('#downloadRedirect'); a2.href = url2; a2.download = slug + '.html';
+    const dataUrl = 'https://inspire-wood.github.io/its-okay/data/' + slug + '.json';
+    $('#downloadData').textContent = '데이타 JSON ('+slug+'.json)';
+    $('#downloadRedirect').textContent = '리디렉트 HTML ('+slug+'.html)';
+    $('#preview').placeholder = '문장을 선택하세요';
+    return dataUrl;
   }
 
-  // HTML escape for inputs
+  function buildUrl(){
+    const base = ($('#cardBase').value||'').trim()||'https://inspire-wood.github.io/its-okay/healing/card/';
+    const name = ($('#name').value||'').trim();
+    const cat = st.currentCat;
+    const msg = currentMessage();
+    const mode = (Array.from(document.querySelectorAll('input[name="mode"]')).find(r=>r.checked)||{value:'daily'}).value;
+    const slug = ($('#slug').value||'').trim() || slugifyCandidate();
+    const dataUrl = 'https://inspire-wood.github.io/its-okay/data/' + slug + '.json';
+
+    const params = new URLSearchParams();
+    if(name) params.set('name', name);
+    params.set('mode', mode); // daily | fixed
+    if(cat) params.set('cat', cat);
+    if(mode==='fixed'){ const ix = st.selected[cat]||0; params.set('sel', String(ix)); }
+    params.set('data', dataUrl);
+
+    const url = base.replace(/\/+$/,'/') + (params.toString()?('?'+params.toString()):'');
+    $('#out').textContent = url;
+    $('#open').href = url;
+
+    // Also refresh download links to include current long URL
+    const html = '<!doctype html><meta charset="utf-8">'+
+                 '<meta http-equiv="refresh" content="0;url='+url.replace(/\"/g,'&quot;')+'">'+
+                 '<link rel="canonical" href="'+url.replace(/\"/g,'&quot;')+'">'+
+                 '<title>Redirecting...</title>'+
+                 '<p>Redirecting to <a href="'+url.replace(/\"/g,'&quot;')+'">target</a>...</p>';
+    const b2 = new Blob([html], {type:'text/html'});
+    const a2 = $('#downloadRedirect'); a2.href = URL.createObjectURL(b2);
+
+    // Data JSON blob
+    const data = { name: st.name, cats: st.cats, msgs: st.msgs };
+    const b1 = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a1 = $('#downloadData'); a1.href = URL.createObjectURL(b1);
+
+    return url;
+  }
+
   function escapeHtml(str){ return (str||'').replace(/[&<>"]/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[s])); }
 </script>
 </body>
