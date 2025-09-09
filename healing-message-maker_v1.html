@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Healing Message Maker (v1) — based on Link‑Maker v2‑2 layout</title>
+
+  <!-- Google Fonts: free for commercial use -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Gowun+Dodum&family=Nanum+Myeongjo:wght@400;700;800&family=Do+Hyeon&family=IBM+Plex+Sans+KR:wght@300;400;500;700&family=Black+Han+Sans&family=Jua&display=swap" rel="stylesheet">
+
+  <!-- QRCode.js (lightweight) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <!-- html-to-image for PNG export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js" defer></script>
+
+  <style>
+    :root{
+      --bg: #0e0d0c;
+      --panel: #1a1816;
+      --muted: #a19a92;
+      --brand: #ffb86c;
+      --accent: #ffd1a6;
+      --ok: #29c46e;
+      --warn: #ff9a3c;
+      --danger: #ff5c5c;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --gradient-warm: radial-gradient(1200px 600px at 10% -20%, #ffe0b2 0%, transparent 60%),
+                       radial-gradient(900px 500px at 100% 10%, #ffd7d7 0%, transparent 60%),
+                       linear-gradient(135deg,#3b2a20 0%, #1d1612 55%, #120f0d 100%);
+      --gradient-cool: radial-gradient(1200px 600px at 0% -20%, #c9ecff 0%, transparent 60%),
+                       radial-gradient(900px 500px at 100% 10%, #d4d7ff 0%, transparent 60%),
+                       linear-gradient(135deg,#1d2433 0%, #121823 55%, #0b0f16 100%);
+      --gradient-wood: linear-gradient(180deg, #7a5a3a 0%, #6b5136 40%, #5a442e 100%);
+    }
+    *{box-sizing:border-box}
+    html,body{
+      height:100%;
+      background:#0b0b0b;
+      color:#eee;
+      font-family: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+    }
+    .wrap{
+      max-width:1200px;
+      margin:24px auto;
+      padding:0 16px 96px;
+    }
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:16px;
+    }
+    .title{
+      font-size:20px; font-weight:800; letter-spacing:0.2px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .badge{font-size:12px; background:#322a22; padding:6px 10px; border-radius: 999px; color:#ffd1a6; border:1px solid #4d3e32;}
+    .grid{
+      display:grid;
+      grid-template-columns: 420px 1fr;
+      gap:16px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .panel{
+      background: #171512;
+      border:1px solid #2a241e;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .controls{ padding:16px; }
+    .controls h3{ margin:12px 0 8px; font-size:14px; color:#ffcf99; letter-spacing:0.3px; }
+    .row{ display:flex; gap:8px; }
+    .row > *{ flex:1; }
+    label{ font-size:12px; color:#bba; display:block; margin-bottom:6px; }
+    input[type="text"], input[type="url"], textarea, select, input[type="number"], input[type="range"]{
+      width:100%; background:#12100e; border:1px solid #2a241e; color:#eee; border-radius:10px;
+      padding:10px 12px; outline:none;
+    }
+    textarea{ min-height:96px; resize:vertical; line-height:1.5; }
+    .hint{ font-size:11px; color:#968b80; margin-top:6px; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:#2a241e; color:#ffd1a6; border:1px solid #3a3128; border-radius:12px; padding:10px 12px; cursor:pointer;
+      user-select:none; text-decoration:none;
+    }
+    .btn.primary{ background: linear-gradient(180deg, #ffb86c, #ff9a3c); color:#1f140a; border-color:#ffa652; }
+    .btn.ghost{ background: transparent; border-color:#3a3128; color:#d9c1aa; }
+    .btn.full{ width:100%; }
+    .btn.big{ padding:14px 16px; font-size:16px; font-weight:700; }
+    .btn-group{ display:flex; flex-wrap:wrap; gap:8px; }
+    .split{ display:grid; grid-template-columns: 1fr 1fr; gap:8px; }
+    .footer-note{ margin-top:14px; font-size:12px; color:#a99; }
+
+    /* PREVIEW */
+    .preview{
+      padding:16px;
+    }
+    .card{
+      position:relative;
+      border-radius: 24px;
+      overflow:hidden;
+      min-height: 520px;
+      background: var(--gradient-warm);
+      border:1px solid #3b2e22;
+      box-shadow: var(--shadow);
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    .card-header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 20px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; font-size:12px; color:#f4e4d1; letter-spacing:0.4px;
+    }
+    .card-actions{ display:flex; gap:8px; }
+    .play-big{
+      position:absolute; right:16px; bottom:16px;
+      display:inline-flex; align-items:center; gap:10px;
+      background: rgba(255, 214, 170, 0.95);
+      color:#2a1c12; border:1px solid #f1c495;
+      padding:14px 16px; border-radius: 16px; font-weight:900; font-size:18px;
+      cursor:pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .msg-wrap{
+      padding:36px 28px 20px; display:flex; flex-direction:column; gap:12px;
+    }
+    .msg-main{
+      font-size:42px; line-height:1.15; letter-spacing:0.2px; word-break:keep-all;
+    }
+    .msg-sub{
+      font-size:16px; opacity:0.85;
+    }
+    .msg-to{
+      font-size:14px; opacity:0.8;
+    }
+    .qr-wrap{
+      display:flex; align-items:center; justify-content:space-between; gap:16px;
+      background: rgba(32,24,18,0.45);
+      border-top:1px solid rgba(255,255,255,0.08);
+      padding:14px 16px;
+    }
+    .qr-box{
+      background:#fff; padding:16px; border-radius:12px; line-height:0;
+      border:1px solid #e8e8e8;
+    }
+    .qr-meta{ font-size:12px; color:#e9dccb; }
+    .font-credit{
+      font-size:11px; color:#e9dccb; opacity:0.9; padding:8px 16px 16px;
+    }
+    .pill{ display:inline-block; font-size:11px; padding:4px 8px; border:1px dashed rgba(255,255,255,0.25); border-radius:999px; color:#ffe0b2; }
+    .mini{ font-size:11px; opacity:0.7; }
+    .sep{ height:1px; background:#2a241e; margin:10px 0; border:0; }
+    .kbd{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; font-size:11px; background:#251f1a; padding:2px 6px; border-radius:6px; border:1px solid #3a3128; color:#ffd1a6;}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">🪵 Healing Message Maker <span class="badge">v1 · Link‑Maker v2‑2 레이아웃 기반</span></div>
+      <div class="btn-group">
+        <button class="btn ghost" id="btnHelp">도움말</button>
+        <button class="btn" id="btnReset">초기화</button>
+        <button class="btn primary" id="btnSavePreset">현재값 저장</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT: CONTROLS -->
+      <section class="panel controls">
+        <h3>① 힐링 메세지</h3>
+        <label for="msgMain">메세지(한글)</label>
+        <textarea id="msgMain" placeholder="예) 괜찮아. 오늘의 너도 충분히 멋져."></textarea>
+        <div class="split">
+          <div>
+            <label for="msgSub">로마자/영문 (자동 생성 후 수정 가능)</label>
+            <input type="text" id="msgSub" placeholder="e.g., It's okay. You're doing enough today.">
+            <div class="btn-group" style="margin-top:6px">
+              <button class="btn" id="btnRomanize">간이 로마자 자동</button>
+              <button class="btn" id="btnRandom">랜덤</button>
+              <button class="btn" id="btnToday">오늘의 문장</button>
+            </div>
+          </div>
+          <div>
+            <label for="toName">수신자(옵션)</label>
+            <input type="text" id="toName" placeholder="예) To. Kim.M.J">
+            <div class="hint">카드 하단에 <span class="kbd">To. …</span> 표기</div>
+          </div>
+        </div>
+
+        <h3>② 링크 & QR</h3>
+        <label for="baseUrl">타겟 URL (랜딩페이지)</label>
+        <input type="url" id="baseUrl" placeholder="예) https://inspire-wood.github.io/its-okay/healing/index.html">
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="utm_source">UTM Source</label>
+            <input type="text" id="utm_source" placeholder="qr">
+          </div>
+          <div>
+            <label for="utm_medium">UTM Medium</label>
+            <input type="text" id="utm_medium" placeholder="woodsign">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="utm_campaign">UTM Campaign</label>
+            <input type="text" id="utm_campaign" placeholder="healing">
+          </div>
+          <div>
+            <label for="quietZone">QR 여백(Quiet Zone, px)</label>
+            <input type="number" id="quietZone" value="16" min="0" max="64">
+          </div>
+        </div>
+        <div class="btn-group" style="margin-top:8px">
+          <button class="btn" id="btnBuildLink">링크 생성</button>
+          <a class="btn ghost" id="aPreviewLink" href="#" target="_blank" rel="noopener">링크 열기</a>
+          <button class="btn" id="btnCopyLink">링크 복사</button>
+          <button class="btn" id="btnMakeQR">QR 생성/업데이트</button>
+        </div>
+        <div class="hint">팁: 링크에 <span class="kbd">m</span>(메세지), <span class="kbd">r</span>(로마자), <span class="kbd">to</span>(수신자) 쿼리를 자동 추가합니다.</div>
+
+        <h3>③ 폰트/스타일</h3>
+        <div class="row">
+          <div>
+            <label for="fontFamily">폰트 선택</label>
+            <select id="fontFamily">
+              <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
+              <option value="'IBM Plex Sans KR', sans-serif">IBM Plex Sans KR</option>
+              <option value="'Gowun Dodum', sans-serif">Gowun Dodum</option>
+              <option value="'Nanum Myeongjo', serif">Nanum Myeongjo</option>
+              <option value="'Do Hyeon', sans-serif">Do Hyeon</option>
+              <option value="'Jua', sans-serif">Jua</option>
+              <option value="'Black Han Sans', sans-serif">Black Han Sans</option>
+            </select>
+          </div>
+          <div>
+            <label for="fontWeight">글자 두께 (<span id="wVal">700</span>)</label>
+            <input type="range" id="fontWeight" min="300" max="900" step="100" value="700">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="tracking">자간 (letter-spacing)</label>
+            <input type="range" id="tracking" min="-1" max="2" step="0.1" value="0">
+          </div>
+          <div>
+            <label for="leading">줄간 (line-height)</label>
+            <input type="range" id="leading" min="1" max="1.8" step="0.05" value="1.15">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="theme">배경 테마</label>
+            <select id="theme">
+              <option value="warm">따뜻한 그라데이션</option>
+              <option value="cool">시원한 그라데이션</option>
+              <option value="wood">우드 텍스처</option>
+            </select>
+          </div>
+          <div>
+            <label for="showRoman">로마자 표시</label>
+            <select id="showRoman">
+              <option value="on">표시</option>
+              <option value="off">숨김</option>
+            </select>
+          </div>
+        </div>
+
+        <h3>④ 음성 (TTS)</h3>
+        <div class="row">
+          <div>
+            <label for="voice">음성</label>
+            <select id="voice"></select>
+          </div>
+          <div>
+            <label for="rate">속도 (<span id="rateVal">1.00</span>)</label>
+            <input type="range" id="rate" min="0.7" max="1.3" step="0.05" value="1.0">
+          </div>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="pitch">피치 (<span id="pitchVal">1.00</span>)</label>
+            <input type="range" id="pitch" min="0.7" max="1.3" step="0.05" value="1.0">
+          </div>
+          <div class="btn-group" style="align-items:end">
+            <button class="btn full" id="btnPreviewTTS">미리듣기</button>
+          </div>
+        </div>
+
+        <h3>⑤ 내보내기</h3>
+        <div class="btn-group">
+          <button class="btn big primary" id="btnDownloadPNG">PNG 저장</button>
+          <button class="btn big" id="btnCopyAll">전체 복사(JSON)</button>
+        </div>
+
+        <hr class="sep">
+        <label for="fontCredit">폰트 출처(Font Credit)</label>
+        <input type="text" id="fontCredit" placeholder="예) 본문: Noto Sans KR (Google Fonts), 제목: Black Han Sans (Google Fonts)">
+        <div class="footer-note">입력값은 자동 저장됩니다. 브라우저를 닫았다 열어도 유지돼요.</div>
+      </section>
+
+      <!-- RIGHT: PREVIEW -->
+      <section class="panel preview">
+        <div class="card" id="card">
+          <div class="card-header">
+            <div class="brand">
+              <span>🌿 Healing Sign</span>
+              <span class="pill">Made in Korea</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn ghost" id="btnOpenLink">열기</button>
+              <button class="btn" id="btnCopyLinkTop">링크 복사</button>
+            </div>
+          </div>
+
+          <div class="msg-wrap" id="msgWrap">
+            <div class="msg-main" id="viewMain">괜찮아. 오늘의 너도 충분히 멋져.</div>
+            <div class="msg-sub" id="viewSub">It's okay. You're doing enough today.</div>
+            <div class="msg-to" id="viewTo">To. Someone</div>
+          </div>
+
+          <div class="qr-wrap">
+            <div>
+              <div class="qr-meta">
+                <div>랜딩: <span class="mini" id="viewUrl">—</span></div>
+                <div>QR: 정사각형 • 고대비 • 여백 포함</div>
+              </div>
+            </div>
+            <div class="qr-box" id="qrBox">
+              <div id="qr" style="width:160px; height:160px;"></div>
+            </div>
+          </div>
+
+          <button class="play-big" id="btnPlay">
+            ▶︎ 플레이 (듣기)
+          </button>
+
+          <div class="font-credit" id="viewFontCredit">Font: Noto Sans KR (Google Fonts)</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+  // ---------- Utilities ----------
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+  const els = {
+    main: $("#msgMain"),
+    sub: $("#msgSub"),
+    to: $("#toName"),
+    base: $("#baseUrl"),
+    utm_source: $("#utm_source"),
+    utm_medium: $("#utm_medium"),
+    utm_campaign: $("#utm_campaign"),
+    quietZone: $("#quietZone"),
+    romanBtn: $("#btnRomanize"),
+    randomBtn: $("#btnRandom"),
+    todayBtn: $("#btnToday"),
+    buildLink: $("#btnBuildLink"),
+    copyLink: $("#btnCopyLink"),
+    copyLinkTop: $("#btnCopyLinkTop"),
+    aPreview: $("#aPreviewLink"),
+    makeQR: $("#btnMakeQR"),
+    fontFamily: $("#fontFamily"),
+    fontWeight: $("#fontWeight"),
+    tracking: $("#tracking"),
+    leading: $("#leading"),
+    showRoman: $("#showRoman"),
+    theme: $("#theme"),
+    voice: $("#voice"),
+    rate: $("#rate"),
+    pitch: $("#pitch"),
+    previewTTS: $("#btnPreviewTTS"),
+    downloadPNG: $("#btnDownloadPNG"),
+    copyAll: $("#btnCopyAll"),
+    openLink: $("#btnOpenLink"),
+    fontCredit: $("#fontCredit"),
+    reset: $("#btnReset"),
+    help: $("#btnHelp"),
+    savePreset: $("#btnSavePreset"),
+    // views
+    vMain: $("#viewMain"),
+    vSub: $("#viewSub"),
+    vTo: $("#viewTo"),
+    vUrl: $("#viewUrl"),
+    vCredit: $("#viewFontCredit"),
+    card: $("#card"),
+    msgWrap: $("#msgWrap"),
+    qrBox: $("#qrBox"),
+    qr: $("#qr"),
+    play: $("#btnPlay"),
+    wVal: $("#wVal"),
+    rateVal: $("#rateVal"),
+    pitchVal: $("#pitchVal"),
+  };
+
+  const STORAGE_KEY = "healingMakerV1";
+
+  const MESSAGES = [
+    ["괜찮아. 오늘의 너도 충분히 멋져.", "It's okay. You're doing enough today."],
+    ["천천히 가도 돼. 중요한 건 멈추지 않는 거야.", "Go slow if you need. Just don't stop."],
+    ["너의 속도로, 너의 길을.", "Your pace. Your path."],
+    ["작은 한 걸음이 큰 변화를 만든다.", "Small steps make big changes."],
+    ["오늘도 잘 해냈어.", "You did well today."],
+    ["잠시 쉬어도 돼. 쉼도 용기야.", "It's okay to rest. Rest takes courage."],
+    ["너는 사랑받기 충분한 사람.", "You are worthy of love."],
+    ["빛은 구름 뒤에서도 자란다.", "Light grows even behind clouds."],
+    ["마음이 말하는 걸 들어줘.", "Listen to what your heart says."],
+    ["시작이 작아도 괜찮아.", "It's okay to start small."],
+    ["꾸준함은 결국 너를 데려다 준다.", "Consistency will take you there."],
+    ["실수는 성장의 증거야.", "Mistakes are signs of growth."],
+    ["너는 이미 충분히 소중해.", "You are already enough."],
+    ["오늘의 해는 너를 위해서도 떴어.", "The sun rose for you too."],
+    ["하루에 하나, 나를 위한 친절.", "One kindness a day, for me."],
+    ["불안은 지나가고, 나는 남아.", "Anxiety passes; I remain."],
+    ["작은 기쁨을 크게 느껴봐.", "Feel small joys in a big way."],
+    ["숨 한 번, 마음 한 번.", "One breath, one heart."],
+    ["괜찮아질 거야. 아니, 이미 괜찮아.", "It will be okay. No, it already is."],
+    ["기다림도 움직임이야.", "Waiting is also moving."],
+    ["오늘의 나는 어제보다 다정해.", "Today I'm kinder than yesterday."],
+    ["나를 믿는 방법을 배우는 중.", "Learning to trust myself."],
+    ["흔들려도 부러지지 않아.", "I bend, but I don't break."],
+    ["밤이 깊을수록 별은 선명해.", "The darker the night, the clearer the stars."],
+    ["괜찮아, 함께 가면 돼.", "It's okay; we'll go together."],
+    ["너의 이야기는 계속되고 있어.", "Your story is still unfolding."],
+    ["사랑은 천천히 스며들어.", "Love seeps in slowly."],
+    ["오늘의 나를 안아줘.", "Hug the you of today."],
+    ["감사에서 시작해 봐.", "Start with gratitude."],
+    ["다음 페이지가 기다리고 있어.", "The next page is waiting."]
+  ];
+
+  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+
+  function save(){
+    const data = {
+      main: els.main.value,
+      sub: els.sub.value,
+      to: els.to.value,
+      base: els.base.value,
+      utm_source: els.utm_source.value,
+      utm_medium: els.utm_medium.value,
+      utm_campaign: els.utm_campaign.value,
+      quietZone: +els.quietZone.value || 16,
+      fontFamily: els.fontFamily.value,
+      fontWeight: els.fontWeight.value,
+      tracking: els.tracking.value,
+      leading: els.leading.value,
+      showRoman: els.showRoman.value,
+      theme: els.theme.value,
+      voice: els.voice.value,
+      rate: els.rate.value,
+      pitch: els.pitch.value,
+      fontCredit: els.fontCredit.value,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function load(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    try{
+      const d = JSON.parse(raw);
+      for(const k in d){
+        const el = els[k] || null;
+        if(el){
+          if(el.tagName === "SELECT" || el.tagName === "INPUT" || el.tagName === "TEXTAREA"){
+            el.value = d[k];
+          }
+        }
+      }
+    }catch(e){ console.warn(e); }
+  }
+
+  function updateView(){
+    els.vMain.textContent = els.main.value || "괜찮아. 오늘의 너도 충분히 멋져.";
+    els.vSub.textContent  = els.sub.value || "It's okay. You're doing enough today.";
+    els.vTo.textContent   = els.to.value ? `To. ${els.to.value}` : " ";
+    els.vCredit.textContent = els.fontCredit.value ? `Font: ${els.fontCredit.value}` : " ";
+    // typography
+    els.msgWrap.style.fontFamily   = els.fontFamily.value;
+    els.msgWrap.style.letterSpacing= `${els.tracking.value}px`;
+    els.msgWrap.style.lineHeight   = els.leading.value;
+    els.vMain.style.fontWeight     = els.fontWeight.value;
+    els.wVal.textContent           = els.fontWeight.value;
+    els.vSub.style.display         = (els.showRoman.value === "on") ? "block" : "none";
+
+    // theme
+    if(els.theme.value === "warm") els.card.style.background = "var(--gradient-warm)";
+    if(els.theme.value === "cool") els.card.style.background = "var(--gradient-cool)";
+    if(els.theme.value === "wood") els.card.style.background = "var(--gradient-wood)";
+
+    // update URL view (does not regenerate)
+    const url = buildLink(false);
+    els.vUrl.textContent = url || "—";
+    els.aPreview.href = url || "#";
+    save();
+  }
+
+  function koreanRomanizeSimple(kor){
+    // VERY SIMPLE romanization (not official). User can edit.
+    // Map initials (approx) – works best for common words
+    const mapChoseong = {
+      "ㄱ":"g","ㄲ":"kk","ㄴ":"n","ㄷ":"d","ㄸ":"tt","ㄹ":"r","ㅁ":"m","ㅂ":"b","ㅃ":"pp","ㅅ":"s","ㅆ":"ss","ㅇ":"","ㅈ":"j","ㅉ":"jj","ㅊ":"ch","ㅋ":"k","ㅌ":"t","ㅍ":"p","ㅎ":"h"
+    };
+    const mapJung = {
+      "ㅏ":"a","ㅐ":"ae","ㅑ":"ya","ㅒ":"yae","ㅓ":"eo","ㅔ":"e","ㅕ":"yeo","ㅖ":"ye","ㅗ":"o","ㅘ":"wa","ㅙ":"wae","ㅚ":"oe","ㅛ":"yo","ㅜ":"u","ㅝ":"wo","ㅞ":"we","ㅟ":"wi","ㅠ":"yu","ㅡ":"eu","ㅢ":"ui","ㅣ":"i"
+    };
+    const mapJong = {
+      "":"", "ㄱ":"k","ㄲ":"k","ㄳ":"k","ㄴ":"n","ㄵ":"n","ㄶ":"n","ㄷ":"t","ㄹ":"l","ㄺ":"k","ㄻ":"m","ㄼ":"p","ㄽ":"l","ㄾ":"l","ㄿ":"p","ㅀ":"l","ㅁ":"m","ㅂ":"p","ㅄ":"p","ㅅ":"t","ㅆ":"t","ㅇ":"ng","ㅈ":"t","ㅊ":"t","ㅋ":"k","ㅌ":"t","ㅍ":"p","ㅎ":"t"
+    };
+    // Use Hangul decomposition via Unicode arithmetic
+    const BASE = 0xac00, CHO = 588, JUNG = 28;
+    const CHO_LIST = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ".split("");
+    const JUNG_LIST= "ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ".split("");
+    const JONG_LIST= ["","ㄱ","ㄲ","ㄳ","ㄴ","ㄵ","ㄶ","ㄷ","ㄹ","ㄺ","ㄻ","ㄼ","ㄽ","ㄾ","ㄿ","ㅀ","ㅁ","ㅂ","ㅄ","ㅅ","ㅆ","ㅇ","ㅈ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+
+    let out = "";
+    for(const ch of kor){
+      const code = ch.charCodeAt(0) - BASE;
+      if(code >= 0 && code < 11172){
+        const cho = CHO_LIST[Math.floor(code / CHO)];
+        const jung= JUNG_LIST[Math.floor((code % CHO)/JUNG)];
+        const jong= JONG_LIST[code % JUNG];
+        out += (mapChoseong[cho] || "") + (mapJung[jung] || "") + (mapJong[jong] || "");
+      }else{
+        out += ch; // punctuation/space
+      }
+    }
+    // tidy
+    out = out.replace(/\s+/g," ").trim();
+    out = out.replace(/\bgeonchang\b/gi, "geonchan"); // tiny tweak
+    return out;
+  }
+
+  // Build link with query-params
+  function buildLink(updateViewHref=true){
+    const base = (els.base.value||"").trim();
+    if(!base) return "";
+    const url = new URL(base);
+    const params = new URLSearchParams(url.search);
+    if(els.main.value) params.set("m", els.main.value);
+    if(els.sub.value)  params.set("r", els.sub.value);
+    if(els.to.value)   params.set("to", els.to.value);
+    if(els.utm_source.value)   params.set("utm_source", els.utm_source.value);
+    if(els.utm_medium.value)   params.set("utm_medium", els.utm_medium.value);
+    if(els.utm_campaign.value) params.set("utm_campaign", els.utm_campaign.value);
+    url.search = params.toString();
+    const s = url.toString();
+    if(updateViewHref){
+      els.aPreview.href = s;
+      els.vUrl.textContent = s;
+    }
+    return s;
+  }
+
+  function copyText(t){
+    navigator.clipboard.writeText(t).then(()=>{
+      toast("복사 완료!");
+    }).catch(()=>{
+      alert("클립보드 복사 실패. 수동으로 복사해주세요.");
+    });
+  }
+
+  function toast(msg){
+    const d = document.createElement("div");
+    d.textContent = msg;
+    Object.assign(d.style, {
+      position:"fixed", left:"50%", transform:"translateX(-50%)",
+      bottom:"24px", background:"#2a241e", color:"#ffd1a6", border:"1px solid #3a3128",
+      padding:"10px 14px", borderRadius:"12px", zIndex:9999, boxShadow:"0 10px 20px rgba(0,0,0,.35)"
+    });
+    document.body.appendChild(d);
+    setTimeout(()=>d.remove(), 1400);
+  }
+
+  // Deterministic "today's message"
+  function todayPick(){
+    const today = new Date();
+    const seed = Number(`${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,"0")}${today.getDate().toString().padStart(2,"0")}`);
+    const idx = seed % MESSAGES.length;
+    els.main.value = MESSAGES[idx][0];
+    els.sub.value  = MESSAGES[idx][1];
+    updateView();
+  }
+
+  function randomPick(){
+    const idx = Math.floor(Math.random() * MESSAGES.length);
+    els.main.value = MESSAGES[idx][0];
+    els.sub.value  = MESSAGES[idx][1];
+    updateView();
+  }
+
+  // QR
+  let qrInstance = null;
+  function makeQR(){
+    const target = buildLink(true) || els.base.value;
+    if(!target){
+      alert("먼저 링크를 입력/생성해주세요.");
+      return;
+    }
+    // clear
+    els.qr.innerHTML = "";
+    // quiet zone by padding container
+    const qz = clamp(parseInt(els.quietZone.value || "16",10), 0, 64);
+    els.qrBox.style.padding = `${qz}px`;
+
+    qrInstance = new QRCode(els.qr, {
+      text: target,
+      width: 160,
+      height: 160,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    toast("QR 생성 완료");
+  }
+
+  // html-to-image export
+  async function downloadPNG(){
+    const node = els.card;
+    // temporarily hide the big play button to keep QR clear? keep it visible by default.
+    try{
+      const dataUrl = await htmlToImage.toPng(node, {pixelRatio: 2});
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "healing_card.png";
+      a.click();
+    }catch(e){
+      console.error(e);
+      alert("PNG 내보내기에 실패했습니다.");
+    }
+  }
+
+  // TTS
+  let voices = [];
+  function loadVoices(){
+    voices = speechSynthesis.getVoices();
+    els.voice.innerHTML = "";
+    // prefer ko-KR
+    const sorted = [...voices].sort((a,b)=>{
+      const aK = a.lang.includes("ko") ? 0 : 1;
+      const bK = b.lang.includes("ko") ? 0 : 1;
+      if(aK !== bK) return aK - bK;
+      return a.name.localeCompare(b.name);
+    });
+    for(const v of sorted){
+      const opt = document.createElement("option");
+      opt.value = v.name;
+      opt.textContent = `${v.name} (${v.lang})`;
+      els.voice.appendChild(opt);
+    }
+    // select first ko voice
+    const ko = sorted.find(v=>v.lang.startsWith("ko"));
+    if(ko) els.voice.value = ko.name;
+  }
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+
+  function speak(text){
+    if(!window.speechSynthesis){ alert("이 브라우저는 음성 합성을 지원하지 않습니다."); return; }
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const sel = voices.find(v=>v.name === els.voice.value) || voices.find(v=>v.lang.startsWith("ko")) || voices[0];
+    if(sel) u.voice = sel;
+    u.lang = sel?.lang || "ko-KR";
+    u.rate = parseFloat(els.rate.value);
+    u.pitch= parseFloat(els.pitch.value);
+    speechSynthesis.speak(u);
+  }
+
+  // Presets
+  function savePreset(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw){ toast("먼저 값을 채워주세요."); return; }
+    const presets = JSON.parse(localStorage.getItem(STORAGE_KEY + ":presets") || "[]");
+    presets.unshift({ at: Date.now(), data: JSON.parse(raw) });
+    localStorage.setItem(STORAGE_KEY + ":presets", JSON.stringify(presets.slice(0, 20)));
+    toast("현재값을 저장했어요.");
+  }
+
+  // ---------- Event bindings ----------
+  ["input","change"].forEach(ev => {
+    [els.main, els.sub, els.to, els.base, els.utm_source, els.utm_medium, els.utm_campaign,
+     els.quietZone, els.fontFamily, els.fontWeight, els.tracking, els.leading, els.showRoman, els.theme,
+     els.voice, els.rate, els.pitch, els.fontCredit
+    ].forEach(el => el.addEventListener(ev, updateView));
+  });
+
+  els.romanBtn.addEventListener("click", ()=>{
+    if(!els.main.value){ alert("먼저 한글 메세지를 입력하세요."); return; }
+    els.sub.value = koreanRomanizeSimple(els.main.value);
+    updateView();
+  });
+  els.randomBtn.addEventListener("click", randomPick);
+  els.todayBtn.addEventListener("click", todayPick);
+  els.buildLink.addEventListener("click", ()=>{ buildLink(true); toast("링크를 생성했어요."); });
+  els.copyLink.addEventListener("click", ()=>{ const s = buildLink(true); if(s) copyText(s); });
+  els.copyLinkTop.addEventListener("click", ()=>{ const s = buildLink(true); if(s) copyText(s); });
+  els.openLink.addEventListener("click", ()=>{ const s = buildLink(true); if(s) window.open(s, "_blank"); });
+  els.makeQR.addEventListener("click", makeQR);
+  els.downloadPNG.addEventListener("click", downloadPNG);
+  els.copyAll.addEventListener("click", ()=>{
+    const payload = {
+      message_kr: els.main.value,
+      message_roman: els.sub.value,
+      to: els.to.value,
+      link: buildLink(true),
+      utm: {source: els.utm_source.value, medium: els.utm_medium.value, campaign: els.utm_campaign.value},
+      font: { family: els.fontFamily.value, weight: els.fontWeight.value, tracking: els.tracking.value, leading: els.leading.value },
+      theme: els.theme.value,
+      fontCredit: els.fontCredit.value,
+    };
+    copyText(JSON.stringify(payload, null, 2));
+  });
+  els.play.addEventListener("click", ()=>{ speak( els.main.value || els.vMain.textContent ); });
+  els.previewTTS.addEventListener("click", ()=>{ speak( els.main.value || els.vMain.textContent ); });
+
+  els.reset.addEventListener("click", ()=>{
+    if(confirm("모든 값을 초기화할까요?")){
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+  });
+  els.help.addEventListener("click", ()=>{
+    alert([
+      "• 메세지(한글)를 입력하고 ‘간이 로마자 자동’을 눌러 영문/로마자를 채울 수 있어요.",
+      "• ‘링크 생성’을 누르면 ?m, ?r, ?to 쿼리로 랜딩페이지에 전달됩니다.",
+      "• ‘QR 생성/업데이트’로 즉시 QR을 만들고, PNG 내보내기로 카드 이미지를 저장하세요.",
+      "• ‘오늘의 문장’은 날짜 기반 고정 선택, ‘랜덤’은 무작위 선택입니다.",
+      "• 폰트 출처(Font Credit)는 카드 하단에 표기됩니다.",
+      "• 입력값은 자동 저장됩니다."
+    ].join("\n"));
+  });
+  els.savePreset.addEventListener("click", savePreset);
+
+  // ---------- Init ----------
+  load();
+  updateView();
+  // default QR if base url exists
+  setTimeout(()=>{ if(els.base.value) makeQR(); }, 700);
+  // load voices after a tiny delay (some browsers need a kick)
+  setTimeout(loadVoices, 300);
+  </script>
+</body>
+</html>
